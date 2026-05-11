@@ -1,4 +1,0 @@
-spring:
-  application:
-    name: multi-tanant-saas-app
-
