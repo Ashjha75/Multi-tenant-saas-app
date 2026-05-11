@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,4 +26,22 @@ public class AbstractEntity {
 
     @Column(name="tenant_id",nullable = false, unique = true)
     private String tenantId;
+
+    @CreatedDate
+    @Column(name = "created_at",nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false,insertable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name="deleted",nullable = false)
+    private Boolean deleted;
+
+    @PrePersist
+    public void onCreate(){
+        if(this.deleted==null){
+            this.deleted=false;
+        }
+    }
 }
