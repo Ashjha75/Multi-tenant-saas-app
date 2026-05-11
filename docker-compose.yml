@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       PGDATA: /var/lib/postgresql/data/data
+      TZ: UTC
+      PGTZ: UTC
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -24,4 +26,3 @@ volumes:
 networks:
   saas-app-network:
     driver: bridge
-

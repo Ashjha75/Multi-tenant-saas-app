@@ -7,7 +7,7 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:saas-app-db}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:saas-app-db}?options=-c%20TimeZone%3DUTC
     username: ${DB_USERNAME:${DB_USER:postgres}}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -17,9 +17,9 @@ spring:
       connection-timeout: 20000
       idle-timeout: 30000
       max-lifetime: 1200000
+      connection-init-sql: SET TIME ZONE 'UTC'
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     properties:
@@ -31,6 +31,7 @@ spring:
         order_inserts: true
         order_updates: true
         multi_tenancy: SCHEMA
+        jdbc_time_zone: UTC
     show-sql: true
     open-in-view: false
 
@@ -57,5 +58,3 @@ springdoc:
     enabled: true
     operations-sorter: alpha
     tags-sorter: alpha
-
-
