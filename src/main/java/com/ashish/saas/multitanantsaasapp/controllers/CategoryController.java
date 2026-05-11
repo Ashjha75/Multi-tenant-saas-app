@@ -6,9 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/categories")
@@ -17,9 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    public ResponseEntity<Void> create(@Valid @RequestBody CategoryRequest request){
+    @PostMapping
+    public ResponseEntity<Void> create(@Valid @RequestBody CategoryRequest request) {
         this.categoryService.create(request);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping
+    public ResponseEntity<Void> update(@Valid @RequestBody CategoryRequest request, @PathVariable String id) {
+        this.categoryService.update(id, request);
+    }
+
 
 }
