@@ -1,6 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.controllers;
 
 import com.ashish.saas.multitanantsaasapp.dto.request.CategoryRequest;
+import com.ashish.saas.multitanantsaasapp.dto.response.CategoryResponse;
 import com.ashish.saas.multitanantsaasapp.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,15 @@ public class CategoryController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping
-    public ResponseEntity<Void> update(@Valid @RequestBody CategoryRequest request, @PathVariable String id) {
+    @PutMapping("/{category-id}")
+    public ResponseEntity<Void> update(@Valid @RequestBody CategoryRequest request, @PathVariable("category-id") final String id) {
         this.categoryService.update(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("category-id")
+    public ResponseEntity<CategoryResponse> getCategory(@PathVariable("category-id") final String id) {
+        return ResponseEntity.ok(this.categoryService.findByID(id));
     }
 
 
