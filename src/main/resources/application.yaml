@@ -1,3 +1,1 @@
-spring:
-  application:
-    name: multi-tanant-saas-app
+# Legacy file left intentionally blank. Use application.yml instead.
