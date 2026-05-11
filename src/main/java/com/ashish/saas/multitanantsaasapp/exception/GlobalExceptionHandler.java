@@ -125,7 +125,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ErrorResponseException.class)
     public ResponseEntity<ApiError> handleErrorResponseException(ErrorResponseException ex,
                                                                  HttpServletRequest request) {
-        return buildResponse(ex.getStatusCode(), ex.getReason(), request, null);
+        String detail = ex.getBody() != null ? ex.getBody().getDetail() : ex.getMessage();
+        return buildResponse(ex.getStatusCode(), detail, request, null);
     }
 
     @ExceptionHandler(Exception.class)
@@ -166,4 +167,3 @@ public class GlobalExceptionHandler {
         return traceId != null && !traceId.isBlank() ? traceId : null;
     }
 }
-
