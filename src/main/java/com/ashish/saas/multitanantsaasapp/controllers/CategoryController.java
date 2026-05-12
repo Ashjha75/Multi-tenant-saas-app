@@ -82,10 +82,10 @@ public class CategoryController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Category found",
-                    content = @Content(schema = @Schema(implementation = CategoryResponse.class))),
+                    content = @Content(schema = @Schema(implementation = com.ashish.saas.multitanantsaasapp.common.PageResponse.class))),
             @ApiResponse(responseCode = "404", description = "Category is Empty")
     })
-    public ResponseEntity<List<CategoryResponse>> getAllCategory() {
+    public ResponseEntity<com.ashish.saas.multitanantsaasapp.common.PageResponse<CategoryResponse>> getAllCategory(org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(this.categoryService.findAll());
     }
 
