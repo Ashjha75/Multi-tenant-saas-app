@@ -58,3 +58,8 @@ springdoc:
     enabled: true
     operations-sorter: alpha
     tags-sorter: alpha
+    doc-expansion: list
+    try-it-out-enabled: true
+
+  api-docs:
+    path: /api-docs
