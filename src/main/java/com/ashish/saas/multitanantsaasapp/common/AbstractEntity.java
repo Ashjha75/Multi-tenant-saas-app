@@ -34,7 +34,7 @@ public class AbstractEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false,insertable = false)
+    @Column(name = "updated_at",insertable = false)
     private LocalDateTime updatedAt;
 
     @Column(name="deleted",nullable = false)
