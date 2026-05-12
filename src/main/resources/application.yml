@@ -1,37 +1,36 @@
 spring:
   application:
     name: saas-app
-  config:
-    import: optional:file:.env[.properties]
+
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: dev
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:saas-app-db}?options=-c%20TimeZone%3DUTC
-    username: ${DB_USERNAME:${DB_USER:postgres}}
-    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://localhost:5432/saas-db
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
+
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
       connection-timeout: 20000
       idle-timeout: 30000
       max-lifetime: 1200000
-      connection-init-sql: SET TIME ZONE 'UTC'
 
   jpa:
     hibernate:
       ddl-auto: update
+
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
-        jdbc:
-          batch_size: 20
         order_inserts: true
         order_updates: true
-        multi_tenancy: SCHEMA
-        jdbc_time_zone: UTC
+        jdbc:
+          batch_size: 20
+
     show-sql: true
     open-in-view: false
 
@@ -44,16 +43,17 @@ spring:
     validate-on-migrate: true
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
 
 app:
   jwt:
-    private-key-path: ${JWT_PRIVATE_KEY_PATH:certs/private_key.pem}
-    public-key-path: ${JWT_PUBLIC_KEY_PATH:certs/public_key.pem}
-    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:8640000}
+    private-key-path: certs/private_key.pem
+    public-key-path: certs/public_key.pem
+    access-token-expiration: 8640000
 
 springdoc:
   default-produces-media-type: application/json
+
   swagger-ui:
     enabled: true
     operations-sorter: alpha

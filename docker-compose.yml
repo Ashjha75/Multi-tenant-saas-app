@@ -4,25 +4,31 @@ services:
   postgres:
     image: postgres:17.5
     container_name: saas-db
+
     environment:
-      POSTGRES_DB: ${DB_NAME:-saas-app-db}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      PGDATA: /var/lib/postgresql/data/data
-      TZ: UTC
-      PGTZ: UTC
+      POSTGRES_DB: saas-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Kolkata
+      PGTZ: Asia/Kolkata
+
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "5432:5432"
+
     volumes:
-      - postgres_data:/var/lib/postgresql/data/data
-    networks:
-      - saas-app-network
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d saas-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
     restart: unless-stopped
+
+networks:
+  default:
+    name: saas-app-network
 
 volumes:
   postgres_data:
-    driver: local
-
-networks:
-  saas-app-network:
-    driver: bridge
