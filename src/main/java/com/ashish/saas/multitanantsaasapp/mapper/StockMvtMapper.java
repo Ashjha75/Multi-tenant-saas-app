@@ -6,18 +6,15 @@ import com.ashish.saas.multitanantsaasapp.entities.Product;
 import com.ashish.saas.multitanantsaasapp.entities.StockMvt;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class StockMvtMapper {
-//, final Optional<Product> product
-    public StockMvt toEntity(final StockMvtRequest request) {
+    public StockMvt toEntity(final StockMvtRequest request, final Product product) {
         return StockMvt.builder()
                 .typeMvt(request.getTypeMvt())
                 .quantity(request.getQuantity())
                 .dateMvt(request.getDateMvt())
                 .comment(request.getComment())
-//                .product(product)
+                .product(product)
                 .deleted(false)
                 .build();
     }
