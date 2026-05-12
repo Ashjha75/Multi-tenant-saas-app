@@ -23,27 +23,30 @@ public class AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name="id",nullable = false, updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private String id;
 
-    @Column(name="tenant_id",nullable = false, unique = true)
+    @Column(name = "tenant_id", nullable = false)
     private String tenantId;
 
     @CreatedDate
-    @Column(name = "created_at",nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at",insertable = false)
+    @Column(name = "updated_at", insertable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name="deleted",nullable = false)
+    @Column(name = "deleted", nullable = false)
     private Boolean deleted;
 
     @PrePersist
-    public void onCreate(){
-        if(this.deleted==null){
-            this.deleted=false;
+    public void onCreate() {
+        if (this.deleted == null) {
+            this.deleted = false;
+        }
+        if (this.tenantId == null) {
+            this.tenantId = "default";
         }
     }
 }

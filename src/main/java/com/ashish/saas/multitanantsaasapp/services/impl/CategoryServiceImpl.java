@@ -49,6 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         final Category updatedCategory = categoryMapper.toEntity(request);
         updatedCategory.setId(category.getId());
+        updatedCategory.setTenantId(category.getTenantId()); // preserve tenant — @PrePersist does NOT fire on update
         this.categoryRepo.save(updatedCategory);
     }
 
