@@ -51,15 +51,8 @@ public class ProductServiceImpl implements ProductService {
 
         // Check if Category Exist or not
         final Category category = checkIfCategoryExistsById(request.getCategoryId());
-
-        // Update in-place to preserve tenant/audit fields
-        existing.setName(request.getName());
-        existing.setReference(request.getReference());
-        existing.setDescription(request.getDescription());
-        existing.setAlertThreshold(request.getAlertThreshold());
-        existing.setPrice(request.getPrice());
-        existing.setCategory(category);
-
+        final Product updatedProduct= this.productMapper.toEntity(request, category);
+        updatedProduct.setId(existing.getId());
         productRepository.save(existing);
     }
 
@@ -73,9 +66,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResponse<ProductResponse> findAll(int page, int size) {
         final PageRequest pageRequest = PageRequest.of(page, size);
-        final Page<Product> productPage = productRepository.findAll(pageRequest);
-        final Page<ProductResponse> response = productPage.map(productMapper::toResponse);
-        return PageResponse.of(response);
+        return PageResponse.of(
+                productRepository.findAll(pageRequest)
+                        .map(productMapper::toResponse)
+        );
     }
 
     @Override
