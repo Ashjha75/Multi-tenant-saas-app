@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/categories")
 @Slf4j
@@ -72,6 +74,19 @@ public class CategoryController {
             @Parameter(description = "UUID of the category to retrieve", example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
             @PathVariable("category-id") final String id) {
         return ResponseEntity.ok(this.categoryService.findByID(id));
+    }
+    @GetMapping
+    @Operation(
+            summary = "Get all category ",
+            description = "Retrieves the details of a all categories ."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Category found",
+                    content = @Content(schema = @Schema(implementation = CategoryResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Category is Empty")
+    })
+    public ResponseEntity<List<CategoryResponse>> getAllCategory() {
+        return ResponseEntity.ok(this.categoryService.findAll());
     }
 
     @DeleteMapping("/{category-id}")
