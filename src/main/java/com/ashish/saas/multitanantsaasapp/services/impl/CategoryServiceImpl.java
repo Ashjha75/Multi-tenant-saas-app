@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,6 +61,11 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(this.categoryMapper::toResponse)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
                         "Category with id " + id + " does not exist"));
+    }
+
+    @Override
+    public List<CategoryResponse> findAll() {
+        return this.categoryRepo.findAll().stream().map(this.categoryMapper::toResponse).toList();
     }
 
     @Override
