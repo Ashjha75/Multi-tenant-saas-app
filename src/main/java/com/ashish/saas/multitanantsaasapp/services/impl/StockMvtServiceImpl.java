@@ -24,7 +24,7 @@ public class StockMvtServiceImpl implements StockMvtService {
     }
 
     @Override
-    public PageResponse<StockMvtResponse> findAll() {
+    public PageResponse<StockMvtResponse> findAll(int page, int size) {
         return null;
     }
 
