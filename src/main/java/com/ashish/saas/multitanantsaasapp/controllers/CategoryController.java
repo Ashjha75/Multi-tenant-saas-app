@@ -85,8 +85,10 @@ public class CategoryController {
                     content = @Content(schema = @Schema(implementation = com.ashish.saas.multitanantsaasapp.common.PageResponse.class))),
             @ApiResponse(responseCode = "404", description = "Category is Empty")
     })
-    public ResponseEntity<com.ashish.saas.multitanantsaasapp.common.PageResponse<CategoryResponse>> getAllCategory(org.springframework.data.domain.Pageable pageable) {
-        return ResponseEntity.ok(this.categoryService.findAll());
+    public ResponseEntity<com.ashish.saas.multitanantsaasapp.common.PageResponse<CategoryResponse>> getAllCategory(
+            @RequestParam(defaultValue = "0") final int page,
+            @RequestParam(defaultValue = "10") final int size) {
+        return ResponseEntity.ok(this.categoryService.findAll(page, size));
     }
 
     @DeleteMapping("/{category-id}")

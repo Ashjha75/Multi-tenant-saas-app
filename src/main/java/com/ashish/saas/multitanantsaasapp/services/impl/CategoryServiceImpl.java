@@ -11,14 +11,12 @@ import com.ashish.saas.multitanantsaasapp.repositories.CategoryRepo;
 import com.ashish.saas.multitanantsaasapp.services.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -77,25 +75,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public PageResponse<CategoryResponse> findAll() {
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        Page<Category> page = this.categoryRepo.findAll(pageable);
-
-        List<CategoryResponse> content = page.getContent()
-                .stream()
-                .map(this.categoryMapper::toResponse)
-                .toList();
-
-        return PageResponse.<CategoryResponse>builder()
-                .content(content)
-                .page(page.getNumber())
-                .size(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .isLast(page.isLast())
-                .build();
+    public PageResponse<CategoryResponse> findAll(final int page, final int size) {
+        final PageRequest pageRequest = PageRequest.of(page, size);
+        final Page<Category> categories = this.categoryRepo.findAll(pageRequest);
+        final Page<CategoryResponse> categoryResponses = categories.map(this.categoryMapper::toResponse);
+        return PageResponse.of(categoryResponses);
     }
 
     @Override
