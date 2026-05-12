@@ -7,6 +7,7 @@ import com.ashish.saas.multitanantsaasapp.exception.AppException;
 import com.ashish.saas.multitanantsaasapp.mapper.CategoryMapper;
 import com.ashish.saas.multitanantsaasapp.repositories.CategoryRepo;
 import com.ashish.saas.multitanantsaasapp.services.CategoryService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepo categoryRepo;

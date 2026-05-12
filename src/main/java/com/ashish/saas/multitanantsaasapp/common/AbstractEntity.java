@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.common;
 
+import com.ashish.saas.multitanantsaasapp.config.TenantContext;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +10,6 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -24,11 +24,11 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @FilterDef(
-        name="tenantFilter",
-        parameters = @ParamDef(name="tenantId",type = String.class),
-        defaultCondition = "tenant_id=:tenantId"
+        name = "tenantFilter",
+        parameters = @ParamDef(name = "tenantId", type = String.class),
+        defaultCondition = "tenant_id = :tenantId AND deleted = false"
 )
-@Filter(name="tenantFilter")
+@Filter(name = "tenantFilter")
 public class AbstractEntity {
 
     @Id
@@ -55,8 +55,15 @@ public class AbstractEntity {
         if (this.deleted == null) {
             this.deleted = false;
         }
+        // Auto-inject tenant from context; fail loudly to prevent silent cross-tenant writes
         if (this.tenantId == null) {
-            this.tenantId = "default";
+            final String tenantFromCtx = TenantContext.getCurrentTenant();
+            if (tenantFromCtx == null || tenantFromCtx.isBlank()) {
+                throw new IllegalStateException(
+                        "[TENANT VIOLATION] tenant_id is null and no tenant found in TenantContext. " +
+                        "All persists require a valid X-Tenant-ID header.");
+            }
+            this.tenantId = tenantFromCtx;
         }
     }
 }
