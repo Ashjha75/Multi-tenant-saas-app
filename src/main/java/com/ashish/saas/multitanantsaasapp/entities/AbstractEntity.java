@@ -1,4 +1,4 @@
-package com.ashish.saas.multitanantsaasapp.common;
+package com.ashish.saas.multitanantsaasapp.entities;
 
 import com.ashish.saas.multitanantsaasapp.config.TenantContext;
 import jakarta.persistence.*;
