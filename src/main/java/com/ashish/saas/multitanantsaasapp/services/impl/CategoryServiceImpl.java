@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.services.impl;
 
+import com.ashish.saas.multitanantsaasapp.config.TenantContext;
 import com.ashish.saas.multitanantsaasapp.dto.request.CategoryRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.CategoryResponse;
 import com.ashish.saas.multitanantsaasapp.entities.Category;
@@ -30,59 +31,94 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void create(CategoryRequest request) {
-//        Check if Category exists or not
-        checkIfCategoryExitsByName(request.getName());
-        final Category category = categoryMapper.toEntity(request);
+        // Name check is tenant-scoped — no cross-tenant collision possible
+        checkIfCategoryExistsByName(request.getName());
+        final Category category = categoryMapper.toEntity(request); // tenantId injected by mapper via TenantContext
         categoryRepo.save(category);
-
     }
 
     @Override
     public void update(String id, CategoryRequest request) {
-        final Optional<Category> existingCategory = this.categoryRepo.findById(id);
-        if (existingCategory.isEmpty()) {
-            log.debug("Category with id {} does not exist", id);
-            throw new AppException(HttpStatus.NOT_FOUND, "Category with id " + id + " does not exist");
-        }
-        final Category category = existingCategory.get();
-//        Check if category already exists
+        final Category category = this.categoryRepo.findById(id)
+                .orElseThrow(() -> {
+                    log.debug("Category with id {} does not exist", id);
+                    return new AppException(HttpStatus.NOT_FOUND, "Category with id " + id + " does not exist");
+                });
+
+        // IDOR (Insecure Direct Object Reference) protection — verify tenant ownership
+        assertTenantOwnership(category.getTenantId(), id);
+
+        // Only check name uniqueness if the name is actually changing
         if (!category.getName().equalsIgnoreCase(request.getName())) {
-            checkIfCategoryExitsByName(request.getName());
+            checkIfCategoryExistsByName(request.getName());
         }
 
-        final Category updatedCategory = categoryMapper.toEntity(request);
-        updatedCategory.setId(category.getId());
-        updatedCategory.setTenantId(category.getTenantId()); // preserve tenant — @PrePersist does NOT fire on update
-        this.categoryRepo.save(updatedCategory);
+        // Update in-place — preserves id, tenantId, createdAt automatically
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        this.categoryRepo.save(category);
     }
 
     @Override
     public CategoryResponse findByID(String id) {
-
         return this.categoryRepo.findById(id)
-                .map(this.categoryMapper::toResponse)
+                .map(category -> {
+                    // IDOR protection on read
+                    assertTenantOwnership(category.getTenantId(), id);
+                    return this.categoryMapper.toResponse(category);
+                })
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
                         "Category with id " + id + " does not exist"));
     }
 
     @Override
     public List<CategoryResponse> findAll() {
-        return this.categoryRepo.findAll().stream().map(this.categoryMapper::toResponse).toList();
+        // Hibernate tenantFilter (activated by TenantHibernateFilter AOP) scopes this query automatically
+        return this.categoryRepo.findAll().stream()
+                .map(this.categoryMapper::toResponse)
+                .toList();
     }
 
     @Override
     public void delete(String id) {
-        final Category category = this.categoryRepo.findById(id).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category with id " + id + " does not exist"));
-        this.categoryRepo.delete(category);
-//        or soft Delete
-//        category.setDeleted(true);
+        final Category category = this.categoryRepo.findById(id)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Category with id " + id + " does not exist"));
+
+        // IDOR protection on delete
+        assertTenantOwnership(category.getTenantId(), id);
+
+        // Soft-delete — preserves audit trail; Hibernate filter (deleted = false) hides it from all future queries
+        category.setDeleted(true);
+        this.categoryRepo.save(category);
+        log.debug("Soft-deleted category id='{}' for tenant='{}'", id, category.getTenantId());
     }
 
-    private void checkIfCategoryExitsByName(String name) {
+    // ── private helpers ───────────────────────────────────────────────────
 
-        final Optional<Category> category = this.categoryRepo.findByNameIgnoreCase(name);
-        if (category.isPresent()) {
-            log.debug("{} Category Already Exists", category.get().getName());
+    /**
+     * Verifies that the current tenant in context matches the entity's owning tenant.
+     * Returns 404 instead of 403 to avoid leaking the existence of another tenant's resource.
+     */
+    private void assertTenantOwnership(String entityTenantId, String resourceId) {
+        final String currentTenant = TenantContext.getCurrentTenant();
+        if (!currentTenant.equals(entityTenantId)) {
+            log.warn("[TENANT VIOLATION] Tenant '{}' attempted to access resource '{}' owned by tenant '{}'",
+                    currentTenant, resourceId, entityTenantId);
+            // Intentional 404 — do NOT reveal that the resource exists for a different tenant
+            throw new AppException(HttpStatus.NOT_FOUND, "Category with id " + resourceId + " does not exist");
+        }
+    }
+
+    /**
+     * Checks if a category with the given name already exists within the current tenant.
+     * Uses explicit JPQL query in repo to guarantee tenant isolation.
+     */
+    private void checkIfCategoryExistsByName(String name) {
+        final String tenantId = TenantContext.getCurrentTenant();
+        final Optional<Category> existing = this.categoryRepo.findByNameIgnoreCaseAndTenant(name, tenantId);
+        if (existing.isPresent()) {
+            log.debug("[TENANT={}] Category '{}' already exists", tenantId, name);
             throw new AppException(HttpStatus.CONFLICT, "CATEGORY_EXISTS", "Category already exists");
         }
     }
