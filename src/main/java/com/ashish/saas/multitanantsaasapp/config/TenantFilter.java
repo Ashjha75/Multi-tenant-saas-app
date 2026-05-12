@@ -35,6 +35,15 @@ public class TenantFilter implements Filter {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
 
+        String path = req.getRequestURI();
+        if (path.startsWith("/swagger-ui") ||
+            path.startsWith("/v3/api-docs") ||
+            path.startsWith("/api-docs") ||
+            path.endsWith("/health")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         final String tenantId = headerResolver(req);
 
         if (tenantId == null || tenantId.isBlank()) {
@@ -77,4 +86,4 @@ public class TenantFilter implements Filter {
         }
         return null;
     }
-}
+}

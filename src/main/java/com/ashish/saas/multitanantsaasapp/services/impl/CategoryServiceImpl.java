@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.services.impl;
 
+import com.ashish.saas.multitanantsaasapp.common.PageResponse;
 import com.ashish.saas.multitanantsaasapp.config.TenantContext;
 import com.ashish.saas.multitanantsaasapp.dto.request.CategoryRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.CategoryResponse;
@@ -8,10 +9,14 @@ import com.ashish.saas.multitanantsaasapp.exception.AppException;
 import com.ashish.saas.multitanantsaasapp.mapper.CategoryMapper;
 import com.ashish.saas.multitanantsaasapp.repositories.CategoryRepo;
 import com.ashish.saas.multitanantsaasapp.services.CategoryService;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
@@ -72,11 +77,25 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryResponse> findAll() {
-        // Hibernate tenantFilter (activated by TenantHibernateFilter AOP) scopes this query automatically
-        return this.categoryRepo.findAll().stream()
+    public PageResponse<CategoryResponse> findAll() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<Category> page = this.categoryRepo.findAll(pageable);
+
+        List<CategoryResponse> content = page.getContent()
+                .stream()
                 .map(this.categoryMapper::toResponse)
                 .toList();
+
+        return PageResponse.<CategoryResponse>builder()
+                .content(content)
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .last(page.isLast())
+                .build();
     }
 
     @Override
