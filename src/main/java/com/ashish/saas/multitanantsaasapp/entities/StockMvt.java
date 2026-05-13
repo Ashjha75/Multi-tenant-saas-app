@@ -21,6 +21,7 @@ public class StockMvt extends AbstractEntity{
     @Enumerated(EnumType.STRING)
     private TypeMvt typeMvt;
 
+
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
