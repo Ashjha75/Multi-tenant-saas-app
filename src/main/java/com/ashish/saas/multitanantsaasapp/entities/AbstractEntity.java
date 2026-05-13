@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+// FilterDef and Filter are used to apply tenant-specific filtering to all entities
 @FilterDef(
         name = "tenantFilter",
         parameters = @ParamDef(name = "tenantId", type = String.class),
@@ -74,6 +75,9 @@ public class AbstractEntity {
                                 "All persists require a valid X-Tenant-ID header.");
             }
             this.tenantId = tenantFromCtx;
+        }
+        if (this.createdBy == null || this.createdBy.isBlank()) {
+            this.createdBy = "system"; // fallback when auditing/auth is not available
         }
     }
 }
