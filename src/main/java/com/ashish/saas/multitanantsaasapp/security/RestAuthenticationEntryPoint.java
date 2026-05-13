@@ -17,11 +17,7 @@ import java.time.Instant;
 
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    private final ObjectMapper objectMapper;
-
-    public RestAuthenticationEntryPoint(final ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void commence(final HttpServletRequest request,

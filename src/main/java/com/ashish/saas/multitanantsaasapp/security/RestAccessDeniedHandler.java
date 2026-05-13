@@ -17,11 +17,7 @@ import java.time.Instant;
 
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
-    private final ObjectMapper objectMapper;
-
-    public RestAccessDeniedHandler(final ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void handle(final HttpServletRequest request,
