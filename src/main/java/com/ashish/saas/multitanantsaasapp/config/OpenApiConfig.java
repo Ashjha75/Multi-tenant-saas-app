@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -16,46 +17,52 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
+    private static final String TENANT_HEADER = "X-Tenant-ID";
+    private static final String BEARER_AUTH = "BearerAuth";
+
     @Value("${server.port:8080}")
     private int serverPort;
 
     @Bean
-    public OpenAPI openAPI() {
-        final String securitySchemeName = "Bearer Authentication";
+    public OpenAPI customOpenAPI() {
+
+        SecurityScheme tenantScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.HEADER)
+                .name(TENANT_HEADER)
+                .description("Tenant ID header");
+
+        SecurityScheme bearerScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT");
 
         return new OpenAPI()
                 .info(apiInfo())
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:" + serverPort)
-                                .description("Local development server")
+                                .description("Local Development Server")
                 ))
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
-                .schemaRequirement(securitySchemeName, new SecurityScheme()
-                        .name(securitySchemeName)
-                        .type(SecurityScheme.Type.HTTP)
-                        .scheme("bearer")
-                        .bearerFormat("JWT")
-                        .description("Enter your JWT token obtained from the authentication endpoint")
+                .components(new Components()
+                        .addSecuritySchemes(TENANT_HEADER, tenantScheme)
+                        .addSecuritySchemes(BEARER_AUTH, bearerScheme)
+                )
+                .addSecurityItem(
+                        new SecurityRequirement()
+                                .addList(TENANT_HEADER)
+                                .addList(BEARER_AUTH)
                 );
     }
 
     private Info apiInfo() {
         return new Info()
                 .title("ReputeAI SaaS Platform API")
-                .description("""
-                        Multi-tenant SaaS platform API for ReputeAI.
-                        
-                        This API provides endpoints for managing tenants, categories, and other platform resources.
-                        All tenant-scoped operations require a valid JWT token in the Authorization header.
-                        """)
                 .version("1.0.0")
+                .description("Multi-tenant SaaS platform APIs")
                 .contact(new Contact()
                         .name("Ashish Jha")
-                        .email("ashish@reputeai.com")
-                )
-                .license(new License()
-                        .name("Proprietary")
-                );
+                        .email("ashish@reputeai.com"))
+                .license(new License().name("Proprietary"));
     }
 }
