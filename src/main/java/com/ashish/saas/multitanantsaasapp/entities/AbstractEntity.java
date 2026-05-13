@@ -10,7 +10,9 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -47,6 +49,14 @@ public class AbstractEntity {
     @Column(name = "updated_at", insertable = false)
     private LocalDateTime updatedAt;
 
+    @CreatedBy
+    @Column(name = "created_by", nullable = false, updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = "updated_by", insertable = false)
+    private String updatedBy;
+
     @Column(name = "deleted", nullable = false)
     private Boolean deleted;
 
@@ -61,7 +71,7 @@ public class AbstractEntity {
             if (tenantFromCtx == null || tenantFromCtx.isBlank()) {
                 throw new IllegalStateException(
                         "[TENANT VIOLATION] tenant_id is null and no tenant found in TenantContext. " +
-                        "All persists require a valid X-Tenant-ID header.");
+                                "All persists require a valid X-Tenant-ID header.");
             }
             this.tenantId = tenantFromCtx;
         }

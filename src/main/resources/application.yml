@@ -49,6 +49,8 @@ server:
   port: ${SERVER_PORT:8080}
 
 app:
+  tenant:
+    mode: ${TENANT_MODE:filter} # toggle: filter | schema
   jwt:
     private-key-path: certs/private_key.pem
     public-key-path: certs/public_key.pem

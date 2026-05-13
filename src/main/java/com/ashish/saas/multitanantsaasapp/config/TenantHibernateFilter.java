@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
  * AOP advice that activates the Hibernate {@code tenantFilter} before every service method call.
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Aspect
 @Component
+@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "filter", matchIfMissing = true) // toggle: enable only for filter mode
 public class TenantHibernateFilter {
 
     private static final Logger log = LoggerFactory.getLogger(TenantHibernateFilter.class);
