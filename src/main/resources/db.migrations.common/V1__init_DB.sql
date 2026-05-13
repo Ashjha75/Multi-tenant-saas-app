@@ -20,9 +20,9 @@ CREATE TABLE products
     name              VARCHAR(255) NOT NULL,
     reference         VARCHAR(255) NOT NULL,
     description       TEXT         NOT NULL,
-    "alert threshold" INTEGER      NOT NULL,
+    "alert_threshold" INTEGER      NOT NULL,
     price             DECIMAL      NOT NULL,
-    "category id"     VARCHAR(255),
+    "category_id"     VARCHAR(255),
     CONSTRAINT pk_products PRIMARY KEY (id)
 );
 
@@ -33,9 +33,9 @@ CREATE TABLE stock_mvts
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE,
     deleted    BOOLEAN      NOT NULL,
-    "type myt" VARCHAR(255) NOT NULL,
+    "type_mvt" VARCHAR(255) NOT NULL,
     quantity   INTEGER      NOT NULL,
-    "date mvt" date         NOT NULL,
+    "date_mvt" date         NOT NULL,
     comment    TEXT,
     product_id VARCHAR(255),
     CONSTRAINT pk_stock_mvts PRIMARY KEY (id)

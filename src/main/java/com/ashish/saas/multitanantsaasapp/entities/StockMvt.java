@@ -17,14 +17,14 @@ import java.time.LocalDate;
 @Entity
 @Table(name="stock_mvts")
 public class StockMvt extends AbstractEntity{
-    @Column(name = "type myt", nullable = false)
+    @Column(name = "type_mvt", nullable = false)
     @Enumerated(EnumType.STRING)
     private TypeMvt typeMvt;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "date mvt", nullable = false)
+    @Column(name = "date_mvt", nullable = false)
     private LocalDate dateMvt;
 
     @Column(name = "comment", columnDefinition = "TEXT")

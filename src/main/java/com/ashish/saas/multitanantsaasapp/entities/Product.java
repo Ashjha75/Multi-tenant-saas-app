@@ -27,14 +27,14 @@ public class Product extends AbstractEntity{
 
     @Column(name = "description", nullable = false,columnDefinition = "TEXT")
     private String description;
-    @Column(name = "alert threshold", nullable = false)
+    @Column(name = "alert_threshold", nullable = false)
     private Integer alertThreshold;
 
     @Column (name = "price", nullable = false)
     private BigDecimal price;
 
     @ManyToOne
-    @JoinColumn(name = "category id")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @OneToMany(mappedBy = "product")
