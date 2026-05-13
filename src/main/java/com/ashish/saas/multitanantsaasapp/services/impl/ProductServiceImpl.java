@@ -51,8 +51,15 @@ public class ProductServiceImpl implements ProductService {
 
         // Check if Category Exist or not
         final Category category = checkIfCategoryExistsById(request.getCategoryId());
-        final Product updatedProduct= this.productMapper.toEntity(request, category);
-        updatedProduct.setId(existing.getId());
+
+        // Update in-place to preserve id, tenantId, createdAt
+        existing.setName(request.getName());
+        existing.setReference(request.getReference());
+        existing.setDescription(request.getDescription());
+        existing.setAlertThreshold(request.getAlertThreshold());
+        existing.setPrice(request.getPrice());
+        existing.setCategory(category);
+
         productRepository.save(existing);
     }
 
@@ -74,9 +81,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(String id) {
-        productRepository.findById(id)
+        final Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "Product not found"));
-        this.productRepository.deleteById(id);
+
+        // Soft-delete — preserves audit trail; Hibernate filter (deleted = false) hides it from all future queries
+        product.setDeleted(true);
+        this.productRepository.save(product);
+        log.debug("Soft-deleted product id='{}' for tenant='{}'", id, product.getTenantId());
     }
 
     private void checkProductExistance(ProductRequest request, String currentProductId) {

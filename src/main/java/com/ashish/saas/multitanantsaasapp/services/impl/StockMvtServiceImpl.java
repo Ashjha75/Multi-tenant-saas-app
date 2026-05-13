@@ -81,6 +81,10 @@ public class StockMvtServiceImpl implements StockMvtService {
     public void delete(String id) {
         final StockMvt stockMvt = this.stockMvtRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "STOCK_MVT_NOT_FOUND", "StockMvt not found"));
-        this.stockMvtRepository.delete(stockMvt);
+
+        // Soft-delete — preserves audit trail; Hibernate filter (deleted = false) hides it from all future queries
+        stockMvt.setDeleted(true);
+        this.stockMvtRepository.save(stockMvt);
+        log.debug("Soft-deleted stock movement id='{}' for tenant='{}'", id, stockMvt.getTenantId());
     }
 }
