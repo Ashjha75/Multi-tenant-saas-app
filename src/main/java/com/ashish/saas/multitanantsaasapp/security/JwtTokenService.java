@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.security;
 
+import com.ashish.saas.multitanantsaasapp.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
