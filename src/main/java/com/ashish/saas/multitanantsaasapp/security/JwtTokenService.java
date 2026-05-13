@@ -47,3 +47,61 @@ public class JwtTokenService {
                 .compact();
 
     }
+
+    public String getUserIdFromToken(final String token) {
+        final Claims claims = getClaimsFromToken(token);
+        return claims.getSubject();
+    }
+
+    public String getTenantIdFromToken(final String token) {
+        final Claims claims = getClaimsFromToken(token);
+        return claims.get("tenant_id", String.class);
+    }
+
+    public String getRoleFromToken(final String token) {
+        final Claims claims = getClaimsFromToken(token);
+        return claims.get("role", String.class);
+    }
+
+    public boolean validateToken(final String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(this.publicKey)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (final ExpiredJwtException e) {
+            throw new UnauthorizedException("Token has expired");
+        } catch (final UnsupportedOperationException e) {
+            throw new UnauthorizedException("Token is not signed");
+        } catch (final MalformedJwtException e) {
+            throw new UnauthorizedException("Token is malformed");
+        } catch (final SecurityException e) {
+            throw new UnauthorizedException("Invalid JWT Signature");
+        } catch (final IllegalArgumentException e) {
+            throw new UnauthorizedException("JWT claims string is empty");
+        }
+        private Claims getClaimsFromToken ( final String token){
+            return Jwts.parser().
+                    verifyWith(this.publicKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        }
+        private PrivateKey loadPrivateKey ( final String privateKeyPath) throws Exception {
+            1 usage
+            try (final InputStream is = JwtTokenService.class.getClassLoader().getResourceAsStream(privateKeyPath)) {
+                if (is == null) {
+                    throw new RuntimeException("Private key not found");
+                }
+
+                final String key = new String(is.readAllBytes());
+                final String privateKeyPEM = key.replace(target:" ----- BEGIN PRIVATE KEY ----- ", replacement:"") .
+                replace(target:" ----- END PRIVATE KEY ----- ", replacement:"") .replaceALL(regex:"\\s", replacement:"")
+                ;
+
+                final byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+                final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+                return KeyFactory.getInstance(algorithm:"RSA") .generatePrivate(keySpec);
+            }
+        }
