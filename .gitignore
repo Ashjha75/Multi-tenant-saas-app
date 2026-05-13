@@ -63,3 +63,8 @@ build/
 .env.*
 !.env.example
 
+
+
+# JWT private/public keys (PEM) - keep keys out of the repository
+src/main/resources/certs/*.pem
+
