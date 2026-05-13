@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Date;
@@ -88,20 +89,26 @@ public class JwtTokenService {
                     .parseSignedClaims(token)
                     .getPayload();
         }
-        private PrivateKey loadPrivateKey ( final String privateKeyPath) throws Exception {
-            1 usage
+        private PrivateKey loadPrivateKey(final String privateKeyPath) throws Exception {
             try (final InputStream is = JwtTokenService.class.getClassLoader().getResourceAsStream(privateKeyPath)) {
                 if (is == null) {
                     throw new RuntimeException("Private key not found");
                 }
 
                 final String key = new String(is.readAllBytes());
-                final String privateKeyPEM = key.replace(target:" ----- BEGIN PRIVATE KEY ----- ", replacement:"") .
-                replace(target:" ----- END PRIVATE KEY ----- ", replacement:"") .replaceALL(regex:"\\s", replacement:"")
+                final String privateKeyPEM = key.replace(target:" ----- BEGIN PRIVATE KEY ----- ", "") .
+                replace(target:" ----- END PRIVATE KEY ----- ", "") .replaceALL(regex:"\\s", "")
                 ;
 
                 final byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
                 final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
                 return KeyFactory.getInstance(algorithm:"RSA") .generatePrivate(keySpec);
+            }
+            private PublicKey loadPublicKey(final String publicKeyPath) throws Excelsion { 1 usage try (final InputStream is = JwtTokenService. class. getClassLoader () .getResourceAsStream(publicKeyPath)) { if (is == null) { throw new RuntimeException("Public key not found"); }
+
+                final String key = new String(is.readAllBytes()); final String publicKeyPEM = key . replace ( target: " ----- BEGIN PUBLIC KEY ----- ",  "") .replace ( target: " ----- END PUBLIC KEY -- | --- ",  "") .replaceALL( regex: "\ \s",  "");
+
+                final byte[] encoded = Base64.getDecoder() . decode (publicKeyPEM) ; final X509EncodedKeySpec keySpec = new X509EncodedKeySpec (encoded) ; return KeyFactory. getInstance( algorithm: "RSA") . generatePublic (keySpec); }
+
             }
         }
