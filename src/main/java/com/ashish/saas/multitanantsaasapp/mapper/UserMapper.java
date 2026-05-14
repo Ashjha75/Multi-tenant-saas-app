@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserMapper {
-
-    public User toEntity(final UserRequest request, final Tenant tenant) {
+//, final Tenant tenant
+    public User toEntity(final UserRequest request) {
         return User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(request.getPassword()) // Should be encrypted in service layer
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .role(UserRole.valueOf(request.getRole()))
-                .tenant(tenant)
+                .role(request.getRole())
+//                .tenant(tenant)
                 .enabled(true) // Default: new users are enabled
                 .deleted(false)
                 .build();
