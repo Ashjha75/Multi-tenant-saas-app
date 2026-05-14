@@ -136,32 +136,51 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void enableUser(String userId) {
+        final String tenantId = TenantContext.getCurrentTenant();
+        final User user = this.userRepo.findByIdAndNotDeleted(userId).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
+// check if user belongs to the tenant
+        if (!user.getTenantId().equals(tenantId)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
+        }
+        user.setEnabled(true);
+        this.userRepo.save(user);
+        log.info("User enabled successfully");
     }
 
     @Override
     public void disableUser(String userId) {
+        final String tenantId = TenantContext.getCurrentTenant();
+        final User user = this.userRepo.findByIdAndNotDeleted(userId).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
+// check if user belongs to the tenant
+        if (!user.getTenantId().equals(tenantId)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
+        }
+        user.setEnabled(false);
+        this.userRepo.save(user);
+        log.info("User enabled successfully");
     }
+}
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
+@Override
+public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of();
+}
 
-    @Override
-    public @Nullable String getPassword() {
-        return "";
-    }
+@Override
+public @Nullable String getPassword() {
+    return "";
+}
 
-    @Override
-    public String getUsername() {
-        return "";
-    }
+@Override
+public String getUsername() {
+    return "";
+}
 
-    @Override
-    public UserDetails LoadUserByUsername(final String username) throws UsernameNotFoundException {
-        return this.userRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No user was found with: " + username));
-    }
+@Override
+public UserDetails LoadUserByUsername(final String username) throws UsernameNotFoundException {
+    return this.userRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No user was found with: " + username));
+}
 
 }
