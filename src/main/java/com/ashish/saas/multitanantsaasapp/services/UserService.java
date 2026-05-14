@@ -4,9 +4,10 @@ import com.ashish.saas.multitanantsaasapp.common.PageResponse;
 import com.ashish.saas.multitanantsaasapp.dto.request.UserRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.UserResponse;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public interface UserService extends UserDetails {
+public interface UserService extends UserDetailsService {
     void createUser(final UserRequest request);
 
     void updateUser(final String id, final UserRequest request);
@@ -21,5 +22,6 @@ public interface UserService extends UserDetails {
 
     void disableUser(final String userId);
 
-    UserDetails LoadUserByUsername(String username) throws UsernameNotFoundException;
+    @Override
+    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 }

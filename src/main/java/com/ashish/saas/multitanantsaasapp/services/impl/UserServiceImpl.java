@@ -14,19 +14,14 @@ import com.ashish.saas.multitanantsaasapp.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -67,10 +62,11 @@ public class UserServiceImpl implements UserService {
         final String tenantId = TenantContext.getCurrentTenant();
         log.info("Updating user for tenant: {}", tenantId);
 
-        final User user = this.userRepo.findByIdAndNotDeleted(id).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        final User user = this.userRepo.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-// check if user belongs to the tenant
-        if (!user.getTenant().getId().equals(tenantId)) {
+        // check if user belongs to the tenant
+        if (user.getTenantId() == null || !user.getTenantId().equals(tenantId)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
         }
 // check if username is being changed and if it is already taken
@@ -104,8 +100,8 @@ public class UserServiceImpl implements UserService {
         final User user = this.userRepo.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-// check if user belongs to the tenant
-        if (!user.getTenantId().equals(tenantId)) {
+        // check if user belongs to the tenant
+        if (user.getTenantId() == null || !user.getTenantId().equals(tenantId)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
         }
         user.setDeleted(true);
@@ -116,10 +112,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUserById(String userId) {
         final String tenantId = TenantContext.getCurrentTenant();
-        final User user = this.userRepo.findByIdAndNotDeleted(userId).
-                orElseThrow(() -> new EntityNotFoundException("User does not exist"));
-// check if user belongs to the tenant
-        if (!user.getTenantId().equals(tenantId)) {
+        final User user = this.userRepo.findByIdAndNotDeleted(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        // check if user belongs to the tenant
+        if (user.getTenantId() == null || !user.getTenantId().equals(tenantId)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
         }
         return this.userMapper.toResponse(user);
@@ -129,7 +125,7 @@ public class UserServiceImpl implements UserService {
     public PageResponse<UserResponse> getAllUsers(int page, int size) {
         final String tenantId = TenantContext.getCurrentTenant();
         final PageRequest pageRequest = PageRequest.of(page, size);
-        final Page<User> userPage = this.userRepo.findAllByTenantId(tenantId, pageRequest);
+        final Page<User> userPage = this.userRepo.findAllByTenantIdAndNotDeleted(tenantId, pageRequest);
         final Page<UserResponse> userResponses = userPage.map(this.userMapper::toResponse);
         return PageResponse.of(userResponses);
     }
@@ -137,10 +133,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void enableUser(String userId) {
         final String tenantId = TenantContext.getCurrentTenant();
-        final User user = this.userRepo.findByIdAndNotDeleted(userId).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        final User user = this.userRepo.findByIdAndNotDeleted(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-// check if user belongs to the tenant
-        if (!user.getTenantId().equals(tenantId)) {
+        // check if user belongs to the tenant
+        if (user.getTenantId() == null || !user.getTenantId().equals(tenantId)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
         }
         user.setEnabled(true);
@@ -151,36 +148,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public void disableUser(String userId) {
         final String tenantId = TenantContext.getCurrentTenant();
-        final User user = this.userRepo.findByIdAndNotDeleted(userId).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        final User user = this.userRepo.findByIdAndNotDeleted(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-// check if user belongs to the tenant
-        if (!user.getTenantId().equals(tenantId)) {
+        // check if user belongs to the tenant
+        if (user.getTenantId() == null || !user.getTenantId().equals(tenantId)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "User does not belong to the tenant");
         }
         user.setEnabled(false);
         this.userRepo.save(user);
-        log.info("User enabled successfully");
+        log.info("User disabled successfully");
     }
-}
 
-@Override
-public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of();
-}
 
-@Override
-public @Nullable String getPassword() {
-    return "";
-}
-
-@Override
-public String getUsername() {
-    return "";
-}
-
-@Override
-public UserDetails LoadUserByUsername(final String username) throws UsernameNotFoundException {
-    return this.userRepo.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No user was found with: " + username));
-}
+    @Override
+    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+        return this.userRepo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("No user was found with: " + username));
+    }
 
 }
