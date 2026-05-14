@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.dto.request;
 
+import com.ashish.saas.multitanantsaasapp.entities.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -43,7 +44,7 @@ public class UserRequest {
 
     @NotBlank(message = "Role is required")
     @Schema(description = "User role (e.g., ADMIN, USER, MANAGER)", example = "USER", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String role;
+    private UserRole role;
 
     @Schema(description = "Tenant ID (auto-injected from context if not provided)")
     private String tenantId;
