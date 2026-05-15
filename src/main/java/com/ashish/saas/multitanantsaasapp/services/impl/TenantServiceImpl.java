@@ -137,30 +137,31 @@ public class TenantServiceImpl implements TenantService {
 
     private void createAdminUser(final Tenant tenant) {
 
+        // Check by username — if admin already belongs to this tenant, skip
         if (userRepo.existsByUsername(tenant.getAdminUsername())) {
             final User existing = userRepo.findByUsername(tenant.getAdminUsername())
                     .orElse(null);
-            if (existing != null && existing.getTenant() != null
-                    && tenant.getId().equals(existing.getTenant().getId())) {
+            if (existing != null && isSameTenant(existing, tenant)) {
                 log.info("Admin user already exists for tenant: {}", tenant.getId());
                 return;
             }
             throw new AppException(
                     HttpStatus.BAD_REQUEST,
-                    "User already exists"
+                    "Username '" + tenant.getAdminUsername() + "' is already taken"
             );
         }
 
+        // Check by email — same tenant-ownership logic
         if (userRepo.existsByEmail(tenant.getAdminEmail())) {
             throw new AppException(
                     HttpStatus.BAD_REQUEST,
-                    "User already exists"
+                    "Email '" + tenant.getAdminEmail() + "' is already taken"
             );
         }
 
         User adminUser = User.builder()
                 .username(tenant.getAdminUsername())
-                .email(tenant.getEmail())
+                .email(tenant.getAdminEmail())
                 .firstName(extractFirstName(
                         tenant.getAdminFullName()))
                 .lastName(extractLastName(
@@ -174,7 +175,23 @@ public class TenantServiceImpl implements TenantService {
 
         userRepo.save(adminUser);
 
-        log.info("Admin User Created Successfully");
+        log.info("Admin User Created Successfully for tenant: {}", tenant.getCompanyCode());
+    }
+
+    /**
+     * Check if the user belongs to the given tenant.
+     * Compares both the ManyToOne FK (getTenant()) and the AbstractEntity tenantId field.
+     */
+    private boolean isSameTenant(User user, Tenant tenant) {
+        // Check the ManyToOne FK relationship
+        if (user.getTenant() != null) {
+            return tenant.getId().equals(user.getTenant().getId());
+        }
+        // Fallback: compare the AbstractEntity tenantId field (set by @PrePersist / seed data)
+        if (user.getTenantId() != null) {
+            return tenant.getId().equals(user.getTenantId());
+        }
+        return false;
     }
 
     private String extractFirstName(String adminFullName) {

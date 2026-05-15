@@ -34,6 +34,7 @@ ON CONFLICT(company_code)
 INSERT INTO users
 (id,
  tenant_id,
+ "tenant id",
  username,
  email,
  password,
@@ -45,6 +46,7 @@ INSERT INTO users
  created_by,
  deleted)
 VALUES (gen_random_uuid(),
+        '556e48ea-8f76-4d56-8517-4c3c0a8f6db4',
         '556e48ea-8f76-4d56-8517-4c3c0a8f6db4',
         'admin',
         'admin@acme.com',
