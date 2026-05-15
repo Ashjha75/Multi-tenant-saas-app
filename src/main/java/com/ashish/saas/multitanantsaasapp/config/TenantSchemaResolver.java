@@ -14,7 +14,7 @@ public class TenantSchemaResolver {
 
     private final static String PUBLIC_SCHEMA = "public";
 
-    @Cacheable("tenantSchemas",key = "#tenantId")
+    @Cacheable(cacheNames = "tenantSchemas",key = "#tenantId")
     public String resolveTenantSchema(final String tenantId) {
         if (tenantId == null) {
             return PUBLIC_SCHEMA;
