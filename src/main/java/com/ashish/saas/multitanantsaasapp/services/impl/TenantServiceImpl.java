@@ -137,9 +137,21 @@ public class TenantServiceImpl implements TenantService {
 
     private void createAdminUser(final Tenant tenant) {
 
-        if (userRepo.existsByUsername(
-                tenant.getAdminUsername())) {
+        if (userRepo.existsByUsername(tenant.getAdminUsername())) {
+            final User existing = userRepo.findByUsername(tenant.getAdminUsername())
+                    .orElse(null);
+            if (existing != null && existing.getTenant() != null
+                    && tenant.getId().equals(existing.getTenant().getId())) {
+                log.info("Admin user already exists for tenant: {}", tenant.getId());
+                return;
+            }
+            throw new AppException(
+                    HttpStatus.BAD_REQUEST,
+                    "User already exists"
+            );
+        }
 
+        if (userRepo.existsByEmail(tenant.getAdminEmail())) {
             throw new AppException(
                     HttpStatus.BAD_REQUEST,
                     "User already exists"
