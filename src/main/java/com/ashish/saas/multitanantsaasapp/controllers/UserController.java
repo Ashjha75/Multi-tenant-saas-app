@@ -35,6 +35,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "409", description = "Username or email already exists")
     })
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
     public ResponseEntity<Void> createUser(@Valid @RequestBody final UserRequest request) {
         this.userService.createUser(request);
         return ResponseEntity.ok().build();
@@ -47,6 +48,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN','ADMINISTRATOR')")
     public ResponseEntity<Void> updateUser(
             @Valid @RequestBody final UserRequest request,
             @Parameter(description = "UUID of the user to update")
@@ -63,6 +65,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN','ADMINISTRATOR')")
     public ResponseEntity<UserResponse> getUserById(
             @Parameter(description = "UUID of the user to retrieve")
             @PathVariable("user-id") final String userId
@@ -76,6 +79,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Users found",
                     content = @Content(schema = @Schema(implementation = PageResponse.class)))
     })
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
     public ResponseEntity<PageResponse<UserResponse>> getAllUsers(
             @RequestParam(defaultValue = "0") final int page,
             @RequestParam(defaultValue = "10") final int size
@@ -89,6 +93,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "User deleted successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
     public ResponseEntity<Void> deleteUser(
             @Parameter(description = "UUID of the user to delete")
             @PathVariable("user-id") final String userId
@@ -103,6 +108,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "User enabled successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
     public ResponseEntity<Void> enableUser(
             @Parameter(description = "UUID of the user to enable")
             @PathVariable("user-id") final String userId
@@ -117,6 +123,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "User disabled successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
     public ResponseEntity<Void> disableUser(
             @Parameter(description = "UUID of the user to disable")
             @PathVariable("user-id") final String userId

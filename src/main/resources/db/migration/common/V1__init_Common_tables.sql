@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS users
     "first_name" VARCHAR(255) NOT NULL,
     "last_name"  VARCHAR(255) NOT NULL,      -- matches @Column(name = "Last name")
     role         VARCHAR(255) NOT NULL,
-    "enabled "   BOOLEAN,                    -- trailing space matches entity @Column
+    "enabled"   BOOLEAN,                    -- trailing space matches entity @Column
 
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT chk_user_role CHECK (role IN (
