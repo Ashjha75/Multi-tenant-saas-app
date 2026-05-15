@@ -68,6 +68,14 @@ public class AbstractEntity {
         }
         // Auto-inject tenant from context; fail loudly to prevent silent cross-tenant writes
         if (this.tenantId == null) {
+            if (this instanceof Tenant tenant) {
+                final String companyCode = tenant.getCompanyCode();
+                if (companyCode != null && !companyCode.isBlank()) {
+                    this.tenantId = companyCode.toLowerCase();
+                }
+            }
+        }
+        if (this.tenantId == null) {
             final String tenantFromCtx = TenantContext.getCurrentTenant();
             if (tenantFromCtx == null || tenantFromCtx.isBlank()) {
                 throw new IllegalStateException(

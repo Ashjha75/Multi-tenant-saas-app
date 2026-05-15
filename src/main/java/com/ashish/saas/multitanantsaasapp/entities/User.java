@@ -45,7 +45,7 @@ public class User extends AbstractEntity implements UserDetails {
     private
     UserRole role;
 
-    @Column(name = "enabled ")
+    @Column(name = "enabled")
     private boolean enabled;
 
     @Override
