@@ -156,6 +156,7 @@ public class TenantServiceImpl implements TenantService {
                 .password(tenant.getAdminPassword())
                 .role(UserRole.ROLE_COMPANY_ADMIN)
                 .tenant(tenant)
+                .enabled(true)
                 .deleted(false)
                 .build();
 
