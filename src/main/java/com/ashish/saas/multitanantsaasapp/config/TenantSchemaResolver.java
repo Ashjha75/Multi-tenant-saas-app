@@ -10,29 +10,67 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class TenantSchemaResolver {
+
+    private static final String PUBLIC_SCHEMA = "public";
+
     private final JdbcTemplate jdbcTemplate;
 
-    private final static String PUBLIC_SCHEMA = "public";
-
-    @Cacheable(cacheNames = "tenantSchemas",key = "#tenantId")
+    @Cacheable(
+            cacheNames = "tenantSchemas",
+            key = "#tenantId"
+    )
     public String resolveTenantSchema(final String tenantId) {
+
         if (tenantId == null) {
             return PUBLIC_SCHEMA;
         }
+
         try {
-            final String companyCode = this.jdbcTemplate.queryForObject(
-                    "SELECT company_code FROM public.tenants WHERE id = ? AND deleted = false", String.class, tenantId
-            );
+
+            String companyCode =
+                    jdbcTemplate.queryForObject(
+                            """
+                                    SELECT company_code
+                                    FROM public.tenants
+                                    WHERE id = ?
+                                    AND deleted = false
+                                    """,
+                            String.class,
+                            tenantId
+                    );
+
             if (companyCode != null) {
-                final String schemaName = "tenant_" + companyCode.toLowerCase();
-                log.debug("Resolved tenant schema for tenantId: {} to schema: {}", tenantId, schemaName);
+
+                String schemaName =
+                        "tenant_" +
+                                companyCode
+                                        .trim()
+                                        .toLowerCase()
+                                        .replaceAll("[^a-z0-9_]", "_");
+
+                log.debug(
+                        "Resolved tenantId: {} to schema: {}",
+                        tenantId,
+                        schemaName
+                );
+
                 return schemaName;
             }
-            log.warn("Tenant schema not found for tenant {}, using public schema", tenantId);
-            return PUBLIC_SCHEMA;
+
+            log.warn(
+                    "Schema not found for tenant: {}. Using public schema",
+                    tenantId
+            );
+
         } catch (Exception e) {
-            log.error("Error while resolving tenant schema for tenantId: {}", tenantId);
+
+            log.error(
+                    "Error resolving schema for tenantId: {}",
+                    tenantId,
+                    e
+            );
         }
+
+        return PUBLIC_SCHEMA;
     }
 }
-

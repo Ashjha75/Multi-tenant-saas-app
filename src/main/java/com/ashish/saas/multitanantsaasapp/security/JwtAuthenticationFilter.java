@@ -1,6 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.security;
 
 import com.ashish.saas.multitanantsaasapp.config.TenantContext;
+import com.ashish.saas.multitanantsaasapp.config.TenantSchemaResolver;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
