@@ -21,14 +21,14 @@ CREATE TABLE tenants
     deleted     BOOLEAN                     NOT NULL DEFAULT FALSE,
 
     -- Tenant-specific columns  (@Column name must match exactly)
-    "company name"    VARCHAR(255) NOT NULL,
-    "company code"    VARCHAR(255) NOT NULL,
+    "company_name"    VARCHAR(255) NOT NULL,
+    "company_code"    VARCHAR(255) NOT NULL,
     email             VARCHAR(255) NOT NULL,
     status            VARCHAR(255) NOT NULL DEFAULT 'PENDING',
-    "admin full name" VARCHAR(255) NOT NULL,
-    "admin email"     VARCHAR(255) NOT NULL,
-    "admin username"  VARCHAR(255) NOT NULL,
-    "admin password"  VARCHAR(255) NOT NULL,
+    "admin_full_name" VARCHAR(255) NOT NULL,
+    "admin_email"     VARCHAR(255) NOT NULL,
+    "admin_username"  VARCHAR(255) NOT NULL,
+    "admin_password"  VARCHAR(255) NOT NULL,
 
     CONSTRAINT pk_tenants PRIMARY KEY (id),
     CONSTRAINT chk_tenant_status CHECK (status IN ('PENDING', 'ACTIVE', 'SUSPENDED', 'INACTIVE'))
@@ -65,8 +65,8 @@ CREATE TABLE users
     username     VARCHAR(255) NOT NULL,
     email        VARCHAR(255) NOT NULL,
     password     VARCHAR(255) NOT NULL,
-    "first name" VARCHAR(255) NOT NULL,
-    "Last name"  VARCHAR(255) NOT NULL,      -- matches @Column(name = "Last name")
+    "first_name" VARCHAR(255) NOT NULL,
+    "last_name"  VARCHAR(255) NOT NULL,      -- matches @Column(name = "Last name")
     role         VARCHAR(255) NOT NULL,
     "enabled "   BOOLEAN,                    -- trailing space matches entity @Column
 

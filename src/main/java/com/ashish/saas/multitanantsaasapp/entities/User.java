@@ -34,10 +34,10 @@ public class User extends AbstractEntity implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "first name", nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "Last name", nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @Enumerated(EnumType.STRING)

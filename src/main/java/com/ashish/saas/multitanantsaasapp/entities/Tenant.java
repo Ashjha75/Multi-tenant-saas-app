@@ -16,10 +16,10 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "tenants")
 public class Tenant extends AbstractEntity {
 
-    @Column(name = "company name", nullable = false)
+    @Column(name = "company_name", nullable = false)
     private String companyName;
 
-    @Column(name = "company code", nullable = false, unique = true)
+    @Column(name = "company_code", nullable = false, unique = true)
     private String companyCode;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -30,16 +30,16 @@ public class Tenant extends AbstractEntity {
     private TenantStatus status = TenantStatus.PENDING;
 
     // initial admin credentials
-    @Column(name = "admin full name", nullable = false)
+    @Column(name = "admin_full_name", nullable = false)
     private String adminFullName;
 
-    @Column(name = "admin email", nullable = false, unique = true)
+    @Column(name = "admin_email", nullable = false, unique = true)
     private String adminEmail;
 
-    @Column(name = "admin username", nullable = false, unique = true)
+    @Column(name = "admin_username", nullable = false, unique = true)
     private String adminUsername;
 
-    @Column(name = "admin password", nullable = false)
+    @Column(name = "admin_password", nullable = false)
     private String adminPassword;
 
 }
