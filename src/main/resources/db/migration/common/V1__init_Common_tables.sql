@@ -9,7 +9,7 @@
 -- Matches: Tenant extends AbstractEntity
 -- Enums:   TenantStatus → PENDING | ACTIVE | SUSPENDED | INACTIVE
 -- ----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS  tenants
+CREATE TABLE IF NOT EXISTS tenants
 (
     -- AbstractEntity base columns
     id          VARCHAR(255)                NOT NULL,
@@ -20,24 +20,24 @@ CREATE TABLE IF NOT EXISTS  tenants
     updated_by  VARCHAR(255),
     deleted     BOOLEAN                     NOT NULL DEFAULT FALSE,
 
-    -- Tenant-specific columns  (@Column name must match exactly)
-    "company_name"    VARCHAR(255) NOT NULL,
-    "company_code"    VARCHAR(255) NOT NULL,
-    email             VARCHAR(255) NOT NULL,
-    status            VARCHAR(255) NOT NULL DEFAULT 'PENDING',
-    "admin_full_name" VARCHAR(255) NOT NULL,
-    "admin_email"     VARCHAR(255) NOT NULL,
-    "admin_username"  VARCHAR(255) NOT NULL,
-    "admin_password"  VARCHAR(255) NOT NULL,
+    -- Tenant-specific columns
+    company_name    VARCHAR(255) NOT NULL,
+    company_code    VARCHAR(255) NOT NULL,
+    email           VARCHAR(255) NOT NULL,
+    status          VARCHAR(255) NOT NULL DEFAULT 'PENDING',
+    admin_full_name VARCHAR(255) NOT NULL,
+    admin_email     VARCHAR(255) NOT NULL,
+    admin_username  VARCHAR(255) NOT NULL,
+    admin_password  VARCHAR(255) NOT NULL,
 
     CONSTRAINT pk_tenants PRIMARY KEY (id),
     CONSTRAINT chk_tenant_status CHECK (status IN ('PENDING', 'ACTIVE', 'SUSPENDED', 'INACTIVE'))
 );
 
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_company_code  UNIQUE ("company_code");
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_email         UNIQUE (email);
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_email   UNIQUE ("admin_email");
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_username UNIQUE ("admin_username");
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_company_code   UNIQUE (company_code);
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_email          UNIQUE (email);
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_email    UNIQUE (admin_email);
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_username UNIQUE (admin_username);
 
 -- ----------------------------------------------------------
 -- users
@@ -45,9 +45,6 @@ ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_username UNIQUE ("admin_user
 -- FK:      "tenant id" → tenants(id)   (JoinColumn name = "tenant id")
 -- Enums:   UserRole → ROLE_PLATFORM_ADMIN | ROLE_COMPANY_ADMIN |
 --                     ROLE_ADMINISTRATOR  | ROLE_USER | ROLE_SALES_OPERATOR
--- NOTE:    AbstractEntity already carries tenant_id (audit copy).
---          The ManyToOne FK column is named "tenant id" (with space) per entity.
---          "enabled " has a trailing space to match @Column(name = "enabled ")
 -- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users
 (
@@ -61,14 +58,14 @@ CREATE TABLE IF NOT EXISTS users
     deleted     BOOLEAN                     NOT NULL DEFAULT FALSE,
 
     -- User-specific columns
-    "tenant id"  VARCHAR(255),               -- FK to tenants.id  (ManyToOne)
+    "tenant id"  VARCHAR(255),               -- FK to tenants.id  (ManyToOne JoinColumn)
     username     VARCHAR(255) NOT NULL,
     email        VARCHAR(255) NOT NULL,
     password     VARCHAR(255) NOT NULL,
-    "first_name" VARCHAR(255) NOT NULL,
-    "last_name"  VARCHAR(255) NOT NULL,      -- matches @Column(name = "Last name")
+    first_name   VARCHAR(255) NOT NULL,
+    last_name    VARCHAR(255) NOT NULL,
     role         VARCHAR(255) NOT NULL,
-    "enabled"   BOOLEAN,                    -- trailing space matches entity @Column
+    enabled      BOOLEAN,
 
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT chk_user_role CHECK (role IN (
