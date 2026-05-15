@@ -3,6 +3,7 @@ package com.ashish.saas.multitanantsaasapp.config;
 import com.ashish.saas.multitanantsaasapp.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.http.HttpStatus;
@@ -74,6 +75,6 @@ public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionP
 
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
-
+        hibernateProperties. put(MultiTenancySettings. MULTI_TENANT_CONNECTION_PROVIDER, this) ;
     }
 }
