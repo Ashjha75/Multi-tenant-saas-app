@@ -9,7 +9,7 @@
 -- Matches: Tenant extends AbstractEntity
 -- Enums:   TenantStatus → PENDING | ACTIVE | SUSPENDED | INACTIVE
 -- ----------------------------------------------------------
-CREATE TABLE tenants
+CREATE TABLE IF NOT EXISTS  tenants
 (
     -- AbstractEntity base columns
     id          VARCHAR(255)                NOT NULL,
@@ -34,10 +34,10 @@ CREATE TABLE tenants
     CONSTRAINT chk_tenant_status CHECK (status IN ('PENDING', 'ACTIVE', 'SUSPENDED', 'INACTIVE'))
 );
 
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_company_code  UNIQUE ("company code");
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_company_code  UNIQUE ("company_code");
 ALTER TABLE tenants ADD CONSTRAINT uc_tenants_email         UNIQUE (email);
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_email   UNIQUE ("admin email");
-ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_username UNIQUE ("admin username");
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_email   UNIQUE ("admin_email");
+ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_username UNIQUE ("admin_username");
 
 -- ----------------------------------------------------------
 -- users
@@ -49,7 +49,7 @@ ALTER TABLE tenants ADD CONSTRAINT uc_tenants_admin_username UNIQUE ("admin user
 --          The ManyToOne FK column is named "tenant id" (with space) per entity.
 --          "enabled " has a trailing space to match @Column(name = "enabled ")
 -- ----------------------------------------------------------
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     -- AbstractEntity base columns
     id          VARCHAR(255)                NOT NULL,

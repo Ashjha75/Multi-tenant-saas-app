@@ -50,7 +50,7 @@ server:
 
 app:
   tenant:
-    mode: ${TENANT_MODE:filter} # toggle: filter | schema
+    mode: ${TENANT_MODE:schema} # toggle: filter | schema
   jwt:
     private-key-path: ${JWT_PRIVATE_KEY_PATH:certs/private_key.pem}
     public-key-path: ${JWT_PUBLIC_KEY_PATH:certs/public_key.pem}

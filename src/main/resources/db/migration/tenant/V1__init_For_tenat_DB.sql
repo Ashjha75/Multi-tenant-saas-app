@@ -7,7 +7,7 @@
 -- categories
 -- Matches: Category extends AbstractEntity
 -- ----------------------------------------------------------
-CREATE TABLE categories
+CREATE TABLE IF NOT EXISTS categories
 (
     -- AbstractEntity base columns
     id          VARCHAR(255)                NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE categories
 -- Matches: Product extends AbstractEntity
 -- FK:      category_id → categories(id)
 -- ----------------------------------------------------------
-CREATE TABLE products
+CREATE TABLE IF NOT EXISTS products
 (
     -- AbstractEntity base columns
     id          VARCHAR(255)                NOT NULL,
@@ -64,7 +64,7 @@ ALTER TABLE products
 -- FK:      product_id → products(id)
 -- Enums:   TypeMvt → IN | OUT  (stored as VARCHAR)
 -- ----------------------------------------------------------
-CREATE TABLE stock_mvts
+CREATE TABLE IF NOT EXISTS stock_mvts
 (
     -- AbstractEntity base columns
     id          VARCHAR(255)                NOT NULL,

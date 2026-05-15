@@ -4,6 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.io.IOException;
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "filter", matchIfMissing = true) // enforce header only in filter mode
 public class TenantFilter implements Filter {
 
     private static final String TENANT_HEADER = "X-Tenant-ID";
