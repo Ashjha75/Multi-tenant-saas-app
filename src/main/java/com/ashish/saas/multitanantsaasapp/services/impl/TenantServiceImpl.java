@@ -99,12 +99,21 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public void deactivateTenant(String tenantId) {
+        Tenant tenant = tenantRepo.findById(tenantId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Tenant does not exist"));
+        tenant.setStatus(TenantStatus.INACTIVE);
+        tenantRepo.save(tenant);
 
     }
 
     @Override
     public void suspendTenant(String tenantId) {
-
+        Tenant tenant = tenantRepo.findById(tenantId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Tenant does not exist"));
+        tenant.setStatus(TenantStatus.SUSPENDED);
+        tenantRepo.save(tenant);
     }
 
     @Override
