@@ -16,6 +16,8 @@ import com.ashish.saas.multitanantsaasapp.services.TenantService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -91,7 +93,9 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantRepo.findById(tenantId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Tenant does not exist"));
-
+        if (tenant.getStatus() != TenantStatus.PENDING) {
+            throw new AppException(HttpStatus.BAD_REQUEST,"Tenant is not in pending status");
+        }
         tenant.setStatus(TenantStatus.ACTIVE);
 
         tenantRepo.save(tenant);
@@ -102,6 +106,9 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantRepo.findById(tenantId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Tenant does not exist"));
+        if (tenant.getStatus() != TenantStatus.ACTIVE) {
+            throw new AppException(HttpStatus.BAD_REQUEST,"Tenant is not  in active status");
+        }
         tenant.setStatus(TenantStatus.INACTIVE);
         tenantRepo.save(tenant);
 
@@ -112,13 +119,20 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = tenantRepo.findById(tenantId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Tenant does not exist"));
+        if (tenant.getStatus() == TenantStatus.ACTIVE) {
+            throw new AppException(HttpStatus.BAD_REQUEST,"Tenant is in active status");
+        }
         tenant.setStatus(TenantStatus.SUSPENDED);
         tenantRepo.save(tenant);
     }
 
     @Override
     public PageResponse<TenantResponse> findAll(int page, int size) {
-        return null;
+        PageRequest pageRequest = PageRequest.of(page, size);
+        final Page<Tenant> tenants = tenantRepo.findAll(pageRequest);
+        final Page<TenantResponse> pageResponse = tenants.map(tenantMapper::toResponse);
+        return PageResponse.of(pageResponse);
+
     }
 
     private void createAdminUser(final Tenant tenant) {
