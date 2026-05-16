@@ -26,6 +26,30 @@ services:
 
     restart: unless-stopped
 
+  # ── Spring Boot App ───────────────────────────────
+  app:
+    build: .
+    container_name: saas-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      DB_HOST: postgres          # docker-compose service name
+      DB_PORT: 5432
+      DB_NAME: saas-db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_TZ: Asia/Kolkata
+      TENANT_MODE: schema
+
+    ports:
+      - "8080:8080"
+
+    restart: unless-stopped
+
 networks:
   default:
     name: saas-app-network

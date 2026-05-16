@@ -1,0 +1,15 @@
+# Ignore build artifacts and IDE files to keep the Docker context small
+target/
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+*.md
+docs/
+*.log
