@@ -135,6 +135,14 @@ public class TenantServiceImpl implements TenantService {
 
     }
 
+    @Override
+    public PageResponse<TenantResponse> findPending(int page, int size) {
+        final PageRequest pageRequest = PageRequest.of(page, size);
+        final Page<Tenant> tenants = tenantRepo.findAllByStatus(TenantStatus.PENDING, pageRequest);
+        final Page<TenantResponse> pageResponse = tenants.map(tenantMapper::toResponse);
+        return PageResponse.of(pageResponse);
+    }
+
     private void createAdminUser(final Tenant tenant) {
 
         // Check by username — if admin already belongs to this tenant, skip

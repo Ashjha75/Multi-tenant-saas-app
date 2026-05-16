@@ -13,4 +13,6 @@ public interface TenantService {
     void suspendTenant(final String tenantId); 
 
     PageResponse<TenantResponse> findAll(final int page, final int size) ;
+
+    PageResponse<TenantResponse> findPending(final int page, final int size);
 }

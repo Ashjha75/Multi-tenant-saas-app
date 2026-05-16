@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -107,6 +108,20 @@ public class TenantController {
             @RequestParam(defaultValue = "10") final int size
     ) {
         return ResponseEntity.ok(this.tenantService.findAll(page, size));
+    }
+
+    @GetMapping("/pending")
+    @Operation(summary = "List pending tenants (paginated)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pending tenants found",
+                    content = @Content(schema = @Schema(implementation = PageResponse.class)))
+    })
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN','ADMINISTRATOR')")
+    public ResponseEntity<PageResponse<TenantResponse>> getPendingTenants(
+            @RequestParam(defaultValue = "0") final int page,
+            @RequestParam(defaultValue = "10") final int size
+    ) {
+        return ResponseEntity.ok(this.tenantService.findPending(page, size));
     }
 }
 
