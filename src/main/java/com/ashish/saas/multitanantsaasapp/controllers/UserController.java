@@ -3,6 +3,7 @@ package com.ashish.saas.multitanantsaasapp.controllers;
 import com.ashish.saas.multitanantsaasapp.common.PageResponse;
 import com.ashish.saas.multitanantsaasapp.dto.request.UserRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.UserResponse;
+import com.ashish.saas.multitanantsaasapp.entities.UserRole;
 import com.ashish.saas.multitanantsaasapp.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -131,5 +135,34 @@ public class UserController {
         this.userService.disableUser(userId);
         return ResponseEntity.ok().build();
     }
-}
 
+    @GetMapping("/roles")
+    @Operation(summary = "List user roles")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Roles returned successfully")
+    })
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN','COMPANY_ADMIN','ADMINISTRATOR')")
+    public ResponseEntity<Map<String, String>> getAllUserRoles() {
+        final Map<String, String> roles = new LinkedHashMap<>();
+        for (final UserRole role : UserRole.values()) {
+            roles.put(role.name(), formatRoleLabel(role.name()));
+        }
+        return ResponseEntity.ok(roles);
+    }
+
+    private String formatRoleLabel(final String enumValue) {
+        final String[] parts = enumValue.replace('_', ' ').toLowerCase().split(" ");
+        final StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            final String part = parts[i];
+            if (!part.isEmpty()) {
+                builder.append(Character.toUpperCase(part.charAt(0)))
+                        .append(part.substring(1));
+            }
+            if (i < parts.length - 1) {
+                builder.append(' ');
+            }
+        }
+        return builder.toString();
+    }
+}

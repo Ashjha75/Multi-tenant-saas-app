@@ -85,4 +85,19 @@ public class AuthenticationController {
 
         return ResponseEntity.ok().build();
     }
+
+    @Operation(
+            summary = "Logout user",
+            description = "Client-side logout endpoint for clearing stored tokens"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Logout successful"
+            )
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.ok().build();
+    }
 }
