@@ -92,8 +92,8 @@ public class CategoryServiceImpl implements CategoryService {
         assertTenantOwnership(category.getTenantId(), id);
 
         // Soft-delete — preserves audit trail; Hibernate filter (deleted = false) hides it from all future queries
-        category.setDeleted(true);
-        this.categoryRepo.save(category);
+//        category.setDeleted(true);
+        this.categoryRepo.delete(category);
         log.debug("Soft-deleted category id='{}' for tenant='{}'", id, category.getTenantId());
     }
 

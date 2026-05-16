@@ -85,8 +85,8 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "Product not found"));
 
         // Soft-delete — preserves audit trail; Hibernate filter (deleted = false) hides it from all future queries
-        product.setDeleted(true);
-        this.productRepository.save(product);
+//        product.setDeleted(true);
+        this.productRepository.delete(product);
         log.debug("Soft-deleted product id='{}' for tenant='{}'", id, product.getTenantId());
     }
 
