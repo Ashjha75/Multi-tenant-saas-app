@@ -12,12 +12,17 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
+    private static final String PUBLIC_SCHEMA = "public";
+    private static final Pattern VALID_SCHEMA_NAME = Pattern.compile("^[a-z0-9_]+$");
+
     private final TenantSchemaResolver tenantSchemaResolver;
     private final DataSource dataSource;
 
@@ -36,8 +41,13 @@ public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionP
         log.debug("Getting connection for tenant: {}", tenantIdentifier);
         final Connection connection = getAnyConnection();
         try {
-            if (tenantIdentifier != null && !tenantIdentifier.equals("public")) {
-                connection.createStatement().execute("SET search_path TO" + tenantIdentifier + ", public");
+            if (tenantIdentifier != null && !PUBLIC_SCHEMA.equals(tenantIdentifier.toString())) {
+                String schemaName = tenantIdentifier.toString();
+                validateSchemaName(schemaName);
+                String sql = String.format("SET search_path TO \"%s\", %s", schemaName, PUBLIC_SCHEMA);
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute(sql);
+                }
                 log.trace("Set search_path to {}", tenantIdentifier);
             }
         } catch (Exception e) {
@@ -50,10 +60,14 @@ public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionP
     @Override
     public void releaseConnection(Object tenantIdentifier, Connection connection) throws SQLException {
         try {
-            connection.createStatement().execute("SET search_path TO public");
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("SET search_path TO public");
+            }
         } catch (Exception e) {
             log.error("Error setting search_path to public", e);
             throw new AppException(HttpStatus.BAD_REQUEST,"Error setting search_path to public");
+        } finally {
+            connection.close();
         }
 
     }
@@ -76,5 +90,11 @@ public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionP
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties. put(MultiTenancySettings. MULTI_TENANT_CONNECTION_PROVIDER, this) ;
+    }
+
+    private void validateSchemaName(String schemaName) {
+        if (!VALID_SCHEMA_NAME.matcher(schemaName).matches()) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid tenant schema: " + schemaName);
+        }
     }
 }
