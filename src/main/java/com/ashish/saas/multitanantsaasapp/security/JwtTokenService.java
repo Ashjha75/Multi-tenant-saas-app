@@ -11,9 +11,12 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -26,27 +29,45 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtTokenService {
+
     private final JwtProperties jwtProperties;
+    private final ResourceLoader resourceLoader;
+
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
     @PostConstruct
     public void init() {
         try {
-            this.privateKey = loadPrivateKey(this.jwtProperties.getPrivateKeyPath());
-            this.publicKey = loadPublicKey(this.jwtProperties.getPublicKeyPath());
-            log.info("Private & Public key Loaded successfully");
-        } catch (final Exception e) {
-            log.error("Error loading private key", e);
-            throw new RuntimeException("Error loading private key", e);
+            log.info("Loading JWT keys...");
+            log.info("Private path: {}", jwtProperties.getPrivateKeyPath());
+            log.info("Public path: {}", jwtProperties.getPublicKeyPath());
+
+            this.privateKey = loadPrivateKey(
+                    jwtProperties.getPrivateKeyPath());
+
+            this.publicKey = loadPublicKey(
+                    jwtProperties.getPublicKeyPath());
+
+            log.info("JWT keys loaded successfully");
+
+        } catch (Exception e) {
+            log.error("Failed to load JWT keys", e);
+            throw new IllegalStateException(
+                    "Unable to initialize JWT keys", e);
         }
     }
 
     public String generateAccessToken(
-            @Nonnull final String tenantId,
-            @Nonnull final String userId, final String role) {
-        final Date now = new Date();
-        final Date expiration = new Date(System.currentTimeMillis() + this.jwtProperties.getAccessTokenExpiration());
+            @Nonnull String tenantId,
+            @Nonnull String userId,
+            String role) {
+
+        Date now = new Date();
+
+        Date expiration = new Date(
+                System.currentTimeMillis()
+                        + jwtProperties.getAccessTokenExpiration());
 
         return Jwts.builder()
                 .subject(userId)
@@ -55,86 +76,108 @@ public class JwtTokenService {
                 .issuedAt(now)
                 .expiration(expiration)
                 .issuer("stock-saas-app")
-                .signWith(this.privateKey, Jwts.SIG.RS256)
+                .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
 
-    public String getUserIdFromToken(final String token) {
-        final Claims claims = getClaimsFromToken(token);
-        return claims.getSubject();
-    }
+    public boolean validateToken(String token) {
 
-    public String getTenantIdFromToken(final String token) {
-        final Claims claims = getClaimsFromToken(token);
-        return claims.get("tenant_id", String.class);
-    }
-
-    public String getRoleFromToken(final String token) {
-        final Claims claims = getClaimsFromToken(token);
-        return claims.get("role", String.class);
-    }
-
-    public boolean validateToken(final String token) {
         try {
             Jwts.parser()
-                    .verifyWith(this.publicKey)
+                    .verifyWith(publicKey)
                     .build()
                     .parseSignedClaims(token);
+
             return true;
-        } catch (final ExpiredJwtException e) {
-            throw new UnauthorizedException("Token has expired");
-        } catch (final UnsupportedJwtException e) {
-            throw new UnauthorizedException("Token is not signed");
-        } catch (final MalformedJwtException e) {
-            throw new UnauthorizedException("Token is malformed");
-        } catch (final SecurityException e) {
-            throw new UnauthorizedException("Invalid JWT Signature");
-        } catch (final IllegalArgumentException e) {
-            throw new UnauthorizedException("JWT claims string is empty");
+
+        } catch (ExpiredJwtException e) {
+            throw new UnauthorizedException("Token expired");
+
+        } catch (MalformedJwtException e) {
+            throw new UnauthorizedException("Malformed token");
+
+        } catch (UnsupportedJwtException e) {
+            throw new UnauthorizedException("Unsupported token");
+
+        } catch (SecurityException e) {
+            throw new UnauthorizedException("Invalid signature");
+
+        } catch (IllegalArgumentException e) {
+            throw new UnauthorizedException("Empty token");
         }
     }
 
-    private Claims getClaimsFromToken(final String token) {
+    public String getUserIdFromToken(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public String getTenantIdFromToken(String token) {
+        return getClaims(token)
+                .get("tenant_id", String.class);
+    }
+
+    public String getRoleFromToken(String token) {
+        return getClaims(token)
+                .get("role", String.class);
+    }
+
+    private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(this.publicKey)
+                .verifyWith(publicKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    private PrivateKey loadPrivateKey(final String privateKeyPath) throws Exception {
-        try (final InputStream is = JwtTokenService.class.getClassLoader().getResourceAsStream(privateKeyPath)) {
-            if (is == null) {
-                throw new RuntimeException("Private key not found");
-            }
+    private PrivateKey loadPrivateKey(String path)
+            throws Exception {
 
-            final String key = new String(is.readAllBytes());
-            final String privateKeyPEM = key
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
+        String pem = readPem(path)
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s+", "");
 
-            final byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
-            final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
-        }
+        byte[] decoded =
+                Base64.getDecoder().decode(pem);
+
+        return KeyFactory.getInstance("RSA")
+                .generatePrivate(
+                        new PKCS8EncodedKeySpec(decoded));
     }
 
-    private PublicKey loadPublicKey(final String publicKeyPath) throws Exception {
-        try (final InputStream is = JwtTokenService.class.getClassLoader().getResourceAsStream(publicKeyPath)) {
-            if (is == null) {
-                throw new RuntimeException("Public key not found");
-            }
+    private PublicKey loadPublicKey(String path)
+            throws Exception {
 
-            final String key = new String(is.readAllBytes());
-            final String publicKeyPEM = key
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s", "");
+        String pem = readPem(path)
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s+", "");
 
-            final byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
-            final X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
+        byte[] decoded =
+                Base64.getDecoder().decode(pem);
+
+        return KeyFactory.getInstance("RSA")
+                .generatePublic(
+                        new X509EncodedKeySpec(decoded));
+    }
+
+    private String readPem(String path)
+            throws Exception {
+
+        Resource resource =
+                resourceLoader.getResource(path);
+
+        if (!resource.exists()) {
+            throw new RuntimeException(
+                    "JWT key not found: " + path);
+        }
+
+        try (InputStream is =
+                     resource.getInputStream()) {
+
+            return new String(
+                    is.readAllBytes(),
+                    StandardCharsets.UTF_8);
         }
     }
 }
