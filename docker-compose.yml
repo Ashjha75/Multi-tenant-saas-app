@@ -1,16 +1,18 @@
 version: '3.8'
 
 services:
+
+  # ── PostgreSQL Database ───────────────────────────────────────
   postgres:
     image: postgres:17.5
     container_name: saas-db
 
     environment:
-      POSTGRES_DB: saas-db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      TZ: Asia/Kolkata
-      PGTZ: Asia/Kolkata
+      POSTGRES_DB:       ${DB_NAME}
+      POSTGRES_USER:     ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ:                ${DB_TZ:-Asia/Kolkata}
+      PGTZ:              ${DB_TZ:-Asia/Kolkata}
 
     ports:
       - "5432:5432"
@@ -19,34 +21,39 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d saas-db" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
     restart: unless-stopped
 
-  # ── Spring Boot App ───────────────────────────────
+  # ── Spring Boot App ───────────────────────────────────────────
   app:
     build: .
     container_name: saas-app
+
+    # Load ALL env vars from the .env file at compose start.
+    # On your VPS, create this file manually (see .env.example).
+    # Never commit .env to git — it is in .gitignore.
+    env_file:
+      - .env
+
+    # Override DB_HOST so the app reaches the postgres *container*,
+    # not localhost (which would be the app container's own loopback).
+    environment:
+      DB_HOST: postgres   # always the docker-compose service name
+
+    volumes:
+      # Mount JWT PEM keys — generated once on the VPS, never in the image
+      - ./certs:/app/certs:ro
+
     depends_on:
       postgres:
         condition: service_healthy
 
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SERVER_PORT: 8080
-      DB_HOST: postgres          # docker-compose service name
-      DB_PORT: 5432
-      DB_NAME: saas-db
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_TZ: Asia/Kolkata
-      TENANT_MODE: schema
-
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:8080"
 
     restart: unless-stopped
 
