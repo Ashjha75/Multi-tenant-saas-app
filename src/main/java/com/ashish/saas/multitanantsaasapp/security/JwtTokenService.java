@@ -11,7 +11,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
@@ -39,22 +38,24 @@ public class JwtTokenService {
     @PostConstruct
     public void init() {
         try {
+
             log.info("Loading JWT keys...");
             log.info("Private path: {}", jwtProperties.getPrivateKeyPath());
             log.info("Public path: {}", jwtProperties.getPublicKeyPath());
 
-            this.privateKey = loadPrivateKey(
-                    jwtProperties.getPrivateKeyPath());
+            this.privateKey = loadPrivateKey(jwtProperties.getPrivateKeyPath());
 
-            this.publicKey = loadPublicKey(
-                    jwtProperties.getPublicKeyPath());
+            this.publicKey = loadPublicKey(jwtProperties.getPublicKeyPath());
 
             log.info("JWT keys loaded successfully");
 
         } catch (Exception e) {
-            log.error("Failed to load JWT keys", e);
+
+            log.error("JWT initialization failed", e);
+
             throw new IllegalStateException(
-                    "Unable to initialize JWT keys", e);
+                    "Unable to initialize JWT keys",
+                    e);
         }
     }
 
@@ -65,9 +66,8 @@ public class JwtTokenService {
 
         Date now = new Date();
 
-        Date expiration = new Date(
-                System.currentTimeMillis()
-                        + jwtProperties.getAccessTokenExpiration());
+        Date expiration = new Date(System.currentTimeMillis()
+                + jwtProperties.getAccessTokenExpiration());
 
         return Jwts.builder()
                 .subject(userId)
@@ -83,6 +83,7 @@ public class JwtTokenService {
     public boolean validateToken(String token) {
 
         try {
+
             Jwts.parser()
                     .verifyWith(publicKey)
                     .build()
@@ -137,8 +138,7 @@ public class JwtTokenService {
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s+", "");
 
-        byte[] decoded =
-                Base64.getDecoder().decode(pem);
+        byte[] decoded = Base64.getDecoder().decode(pem);
 
         return KeyFactory.getInstance("RSA")
                 .generatePrivate(
@@ -153,31 +153,29 @@ public class JwtTokenService {
                 .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s+", "");
 
-        byte[] decoded =
-                Base64.getDecoder().decode(pem);
+        byte[] decoded = Base64.getDecoder().decode(pem);
 
         return KeyFactory.getInstance("RSA")
                 .generatePublic(
                         new X509EncodedKeySpec(decoded));
     }
 
-    private String readPem(String path)
-            throws Exception {
+    private String readPem(String path) {
 
-        Resource resource =
-                resourceLoader.getResource(path);
-
-        if (!resource.exists()) {
-            throw new RuntimeException(
-                    "JWT key not found: " + path);
-        }
-
-        try (InputStream is =
-                     resource.getInputStream()) {
+        try (
+                InputStream is = resourceLoader
+                        .getResource(path)
+                        .getInputStream()) {
 
             return new String(
                     is.readAllBytes(),
                     StandardCharsets.UTF_8);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "JWT key not found: " + path,
+                    e);
         }
     }
 }
