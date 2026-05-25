@@ -27,7 +27,8 @@ This project uses a centralized exception handler to return consistent JSON erro
 ## Handled Cases
 
 - Validation errors: `MethodArgumentNotValidException`, `BindException`, `ConstraintViolationException`
-- Missing/invalid request params: `MissingServletRequestParameterException`, `MissingPathVariableException`, `MethodArgumentTypeMismatchException`
+- Missing/invalid request params: `MissingServletRequestParameterException`, `MissingPathVariableException`,
+  `MethodArgumentTypeMismatchException`
 - Malformed JSON: `HttpMessageNotReadableException`
 - Unsupported media type: `HttpMediaTypeNotSupportedException`
 - Method not allowed: `HttpRequestMethodNotSupportedException`
