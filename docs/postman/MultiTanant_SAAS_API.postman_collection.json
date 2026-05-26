@@ -1,1185 +1,1155 @@
 {
-    "info":  {
-                 "_postman_id":  "d0f6d931-4cf0-4e89-bf37-31f9ea1ec8ea",
-                 "name":  " Multi-Tenant SaaS API -  Collection",
-                 "description":  "Professional Postman collection for demonstrating a JWT-secured, multi-tenant SaaS backend. Includes tenant lifecycle, user management, catalog, stock movements, and automation scripts for bearer token and tenant header injection.",
-                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-             },
-    "event":  [
+  "info": {
+    "_postman_id": "d0f6d931-4cf0-4e89-bf37-31f9ea1ec8ea",
+    "name": " Multi-Tenant SaaS API -  Collection",
+    "description": "Professional Postman collection for demonstrating a JWT-secured, multi-tenant SaaS backend. Includes tenant lifecycle, user management, catalog, stock movements, and automation scripts for bearer token and tenant header injection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level automation",
+          "// 1) Inject X-Tenant-ID from collection variable TENANT_ID",
+          "// 2) Inject Authorization bearer token from ACCESS_TOKEN when available",
+          "const tenantId = pm.collectionVariables.get(\"TENANT_ID\");",
+          "if (tenantId) {",
+          "  pm.request.headers.upsert({ key: \"X-Tenant-ID\", value: tenantId });",
+          "}",
+          "",
+          "const token = pm.collectionVariables.get(\"ACCESS_TOKEN\");",
+          "if (token) {",
+          "  pm.request.headers.upsert({ key: \"Authorization\", value: `Bearer ${token}` });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "TENANT_ID",
+      "value": "public",
+      "type": "string"
+    },
+    {
+      "key": "ACCESS_TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "PAGE",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "SIZE",
+      "value": "10",
+      "type": "string"
+    },
+    {
+      "key": "TENANT_RECORD_ID",
+      "value": "556e48ea-8f76-4d56-8517-4c3c0a8f6db4",
+      "type": "string"
+    },
+    {
+      "key": "USER_ID",
+      "value": "11111111-1111-1111-1111-111111111111",
+      "type": "string"
+    },
+    {
+      "key": "CATEGORY_ID",
+      "value": "22222222-2222-2222-2222-222222222222",
+      "type": "string"
+    },
+    {
+      "key": "PRODUCT_ID",
+      "value": "33333333-3333-3333-3333-333333333333",
+      "type": "string"
+    },
+    {
+      "key": "STOCK_MVT_ID",
+      "value": "44444444-4444-4444-4444-444444444444",
+      "type": "string"
+    },
+    {
+      "key": "PLATFORM_USERNAME",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "PLATFORM_PASSWORD",
+      "value": "SecurePassword123",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "description": "Public schema and platform-level APIs (health, auth, tenant, user).",
+      "item": [
+        {
+          "name": "Health",
+          "description": "Public operational health endpoint for liveness/readiness checks.",
+          "item": [
+            {
+              "name": "Get Health Status",
+              "request": {
+                "method": "GET",
+                "header": [
                   {
-                      "listen":  "prerequest",
-                      "script":  {
-                                     "type":  "text/javascript",
-                                     "exec":  [
-                                                  "// Collection-level automation",
-                                                  "// 1) Inject X-Tenant-ID from collection variable TENANT_ID",
-                                                  "// 2) Inject Authorization bearer token from ACCESS_TOKEN when available",
-                                                  "const tenantId = pm.collectionVariables.get(\"TENANT_ID\");",
-                                                  "if (tenantId) {",
-                                                  "  pm.request.headers.upsert({ key: \"X-Tenant-ID\", value: tenantId });",
-                                                  "}",
-                                                  "",
-                                                  "const token = pm.collectionVariables.get(\"ACCESS_TOKEN\");",
-                                                  "if (token) {",
-                                                  "  pm.request.headers.upsert({ key: \"Authorization\", value: `Bearer ${token}` });",
-                                                  "}"
-                                              ]
-                                 }
+                    "key": "Accept",
+                    "value": "application/json"
                   }
+                ],
+                "description": "Returns service health, DB status, uptime, and build metadata.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/health",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "health"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Authentication",
+          "description": "Authentication and public tenant onboarding endpoints.",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Login returns 200\", function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const json = pm.response.json();",
+                      "if (json \u0026\u0026 json.accessToken) {",
+                      "  pm.collectionVariables.set(\"ACCESS_TOKEN\", json.accessToken);",
+                      "  console.log(\"ACCESS_TOKEN updated from login response.\");",
+                      "} else {",
+                      "  console.warn(\"No accessToken found in login response.\");",
+                      "}"
+                    ]
+                  }
+                }
               ],
-    "variable":  [
-                     {
-                         "key":  "BASE_URL",
-                         "value":  "http://localhost:8080",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "TENANT_ID",
-                         "value":  "public",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "ACCESS_TOKEN",
-                         "value":  "",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "PAGE",
-                         "value":  "0",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "SIZE",
-                         "value":  "10",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "TENANT_RECORD_ID",
-                         "value":  "556e48ea-8f76-4d56-8517-4c3c0a8f6db4",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "USER_ID",
-                         "value":  "11111111-1111-1111-1111-111111111111",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "CATEGORY_ID",
-                         "value":  "22222222-2222-2222-2222-222222222222",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "PRODUCT_ID",
-                         "value":  "33333333-3333-3333-3333-333333333333",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "STOCK_MVT_ID",
-                         "value":  "44444444-4444-4444-4444-444444444444",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "PLATFORM_USERNAME",
-                         "value":  "admin",
-                         "type":  "string"
-                     },
-                     {
-                         "key":  "PLATFORM_PASSWORD",
-                         "value":  "SecurePassword123",
-                         "type":  "string"
-                     }
-                 ],
-    "item":  [
-                 {
-                     "name":  "Public",
-                     "description":  "Public schema and platform-level APIs (health, auth, tenant, user).",
-                     "item":  [
-                                  {
-                                      "name":  "Health",
-                                      "description":  "Public operational health endpoint for liveness/readiness checks.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "Get Health Status",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Returns service health, DB status, uptime, and build metadata.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/health",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "health"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  },
-                                  {
-                                      "name":  "Authentication",
-                                      "description":  "Authentication and public tenant onboarding endpoints.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "Login",
-                                                       "event":  [
-                                                                     {
-                                                                         "listen":  "test",
-                                                                         "script":  {
-                                                                                        "type":  "text/javascript",
-                                                                                        "exec":  [
-                                                                                                     "pm.test(\"Login returns 200\", function () {",
-                                                                                                     "  pm.response.to.have.status(200);",
-                                                                                                     "});",
-                                                                                                     "",
-                                                                                                     "const json = pm.response.json();",
-                                                                                                     "if (json \u0026\u0026 json.accessToken) {",
-                                                                                                     "  pm.collectionVariables.set(\"ACCESS_TOKEN\", json.accessToken);",
-                                                                                                     "  console.log(\"ACCESS_TOKEN updated from login response.\");",
-                                                                                                     "} else {",
-                                                                                                     "  console.warn(\"No accessToken found in login response.\");",
-                                                                                                     "}"
-                                                                                                 ]
-                                                                                    }
-                                                                     }
-                                                                 ],
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Authenticates user credentials and stores JWT token into collection variable ACCESS_TOKEN automatically.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"username\": \"{{PLATFORM_USERNAME}}\",\n  \"password\": \"{{PLATFORM_PASSWORD}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/auth/login",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "auth",
-                                                                                                "login"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Register Tenant (Public)",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Public onboarding endpoint to register a tenant in PENDING state with initial admin details.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"companyName\": \"Orbit Commerce Ltd\",\n  \"companyCode\": \"orbit-commerce\",\n  \"email\": \"contact@orbitcommerce.com\",\n  \"adminFullName\": \"Morgan Lee\",\n  \"adminEmail\": \"morgan.lee@orbitcommerce.com\",\n  \"adminUsername\": \"morgan.lee\",\n  \"adminPassword\": \"SecurePassword123\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/auth/register",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "auth",
-                                                                                                "register"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  },
-                                  {
-                                      "name":  "Tenant Management",
-                                      "description":  "Tenant lifecycle administration APIs.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "List Tenants",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Returns paginated tenant records. Requires authenticated bearer token.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/tenants?page={{PAGE}}\u0026size={{SIZE}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "tenants"
-                                                                                            ],
-                                                                                   "query":  [
-                                                                                                 {
-                                                                                                     "key":  "page",
-                                                                                                     "value":  "{{PAGE}}"
-                                                                                                 },
-                                                                                                 {
-                                                                                                     "key":  "size",
-                                                                                                     "value":  "{{SIZE}}"
-                                                                                                 }
-                                                                                             ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Approve Tenant",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Approves tenant and triggers provisioning flow.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/approve",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "tenants",
-                                                                                                "{{TENANT_RECORD_ID}}",
-                                                                                                "approve"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Activate Tenant",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Activates an existing tenant record.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/activate",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "tenants",
-                                                                                                "{{TENANT_RECORD_ID}}",
-                                                                                                "activate"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Deactivate Tenant",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Deactivates a tenant record.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/deactivate",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "tenants",
-                                                                                                "{{TENANT_RECORD_ID}}",
-                                                                                                "deactivate"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Suspend Tenant",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Suspends an active tenant when compliance or billing restrictions apply.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/suspend",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "tenants",
-                                                                                                "{{TENANT_RECORD_ID}}",
-                                                                                                "suspend"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  },
-                                  {
-                                      "name":  "User Management",
-                                      "description":  "User lifecycle APIs inside tenant scope.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "Create User",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Creates a user in current tenant context.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"username\": \"alex.mercer\",\n  \"email\": \"alex.mercer@orbitcommerce.com\",\n  \"password\": \"SecurePassword123\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Mercer\",\n  \"role\": \"ROLE_USER\",\n  \"tenantId\": \"{{TENANT_ID}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Update User",
-                                                       "request":  {
-                                                                       "method":  "PUT",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Updates user profile and role details.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"username\": \"alex.mercer\",\n  \"email\": \"alex.mercer@orbitcommerce.com\",\n  \"password\": \"SecurePassword123\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Mercer\",\n  \"role\": \"ROLE_ADMINISTRATOR\",\n  \"tenantId\": \"{{TENANT_ID}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users",
-                                                                                                "{{USER_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Get User By ID",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Fetches user details using USER_ID path variable.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users",
-                                                                                                "{{USER_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "List Users",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Returns paginated users for the current tenant.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users?page={{PAGE}}\u0026size={{SIZE}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users"
-                                                                                            ],
-                                                                                   "query":  [
-                                                                                                 {
-                                                                                                     "key":  "page",
-                                                                                                     "value":  "{{PAGE}}"
-                                                                                                 },
-                                                                                                 {
-                                                                                                     "key":  "size",
-                                                                                                     "value":  "{{SIZE}}"
-                                                                                                 }
-                                                                                             ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Delete User",
-                                                       "request":  {
-                                                                       "method":  "DELETE",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Soft deletes user by USER_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users",
-                                                                                                "{{USER_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Enable User",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Enables an existing user account.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users/{{USER_ID}}/enable",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users",
-                                                                                                "{{USER_ID}}",
-                                                                                                "enable"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Disable User",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Disables an existing user account.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/users/{{USER_ID}}/disable",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "users",
-                                                                                                "{{USER_ID}}",
-                                                                                                "disable"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Tenant",
-                     "description":  "Tenant schema domain APIs (category, product, stock movement).",
-                     "item":  [
-                                  {
-                                      "name":  "Category Management",
-                                      "description":  "Category CRUD endpoints under tenant context.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "Create Category",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Creates a category with optional description.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"name\": \"Electronics\",\n  \"description\": \"Consumer electronics including mobiles and accessories\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/categories",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "categories"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Update Category",
-                                                       "request":  {
-                                                                       "method":  "PUT",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Updates category name and description by CATEGORY_ID.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"name\": \"Electronics \u0026 Gadgets\",\n  \"description\": \"Updated category description\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/categories/{{CATEGORY_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "categories",
-                                                                                                "{{CATEGORY_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Get Category By ID",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Fetches single category by CATEGORY_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/categories/{{CATEGORY_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "categories",
-                                                                                                "{{CATEGORY_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "List Categories",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Returns paginated categories.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/categories?page={{PAGE}}\u0026size={{SIZE}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "categories"
-                                                                                            ],
-                                                                                   "query":  [
-                                                                                                 {
-                                                                                                     "key":  "page",
-                                                                                                     "value":  "{{PAGE}}"
-                                                                                                 },
-                                                                                                 {
-                                                                                                     "key":  "size",
-                                                                                                     "value":  "{{SIZE}}"
-                                                                                                 }
-                                                                                             ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Delete Category",
-                                                       "request":  {
-                                                                       "method":  "DELETE",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Soft deletes category by CATEGORY_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/categories/{{CATEGORY_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "categories",
-                                                                                                "{{CATEGORY_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  },
-                                  {
-                                      "name":  "Product Management",
-                                      "description":  "Product CRUD endpoints.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "Create Product",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Creates a product under existing category.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"name\": \"Wireless Mouse\",\n  \"reference\": \"PRD-WM-1001\",\n  \"description\": \"Ergonomic wireless mouse\",\n  \"alertThreshold\": 10,\n  \"price\": 29.99,\n  \"categoryId\": \"{{CATEGORY_ID}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/products",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "products"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Update Product",
-                                                       "request":  {
-                                                                       "method":  "PUT",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Updates product details by PRODUCT_ID.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"name\": \"Wireless Mouse Pro\",\n  \"reference\": \"PRD-WM-1001\",\n  \"description\": \"Upgraded ergonomic wireless mouse\",\n  \"alertThreshold\": 8,\n  \"price\": 34.99,\n  \"categoryId\": \"{{CATEGORY_ID}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/products/{{PRODUCT_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "products",
-                                                                                                "{{PRODUCT_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Get Product By ID",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Fetches single product by PRODUCT_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/products/{{PRODUCT_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "products",
-                                                                                                "{{PRODUCT_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "List Products",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Returns paginated products.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/products?page={{PAGE}}\u0026size={{SIZE}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "products"
-                                                                                            ],
-                                                                                   "query":  [
-                                                                                                 {
-                                                                                                     "key":  "page",
-                                                                                                     "value":  "{{PAGE}}"
-                                                                                                 },
-                                                                                                 {
-                                                                                                     "key":  "size",
-                                                                                                     "value":  "{{SIZE}}"
-                                                                                                 }
-                                                                                             ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Delete Product",
-                                                       "request":  {
-                                                                       "method":  "DELETE",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Soft deletes product by PRODUCT_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/products/{{PRODUCT_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "products",
-                                                                                                "{{PRODUCT_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  },
-                                  {
-                                      "name":  "Stock Movement Management",
-                                      "description":  "Stock movement CRUD endpoints for inventory updates.",
-                                      "item":  [
-                                                   {
-                                                       "name":  "Create Stock Movement",
-                                                       "request":  {
-                                                                       "method":  "POST",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Creates stock movement for a product. Valid enum values: IN, OUT.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"typeMvt\": \"IN\",\n  \"quantity\": 25,\n  \"dateMvt\": \"2026-05-16\",\n  \"comment\": \"Initial stock load\",\n  \"productId\": \"{{PRODUCT_ID}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/stock-mvts",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "stock-mvts"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Update Stock Movement",
-                                                       "request":  {
-                                                                       "method":  "PUT",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Content-Type",
-                                                                                          "value":  "application/json"
-                                                                                      },
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Updates stock movement by STOCK_MVT_ID.",
-                                                                       "body":  {
-                                                                                    "mode":  "raw",
-                                                                                    "raw":  "{\n  \"typeMvt\": \"OUT\",\n  \"quantity\": 5,\n  \"dateMvt\": \"2026-05-16\",\n  \"comment\": \"Order dispatch\",\n  \"productId\": \"{{PRODUCT_ID}}\"\n}",
-                                                                                    "options":  {
-                                                                                                    "raw":  {
-                                                                                                                "language":  "json"
-                                                                                                            }
-                                                                                                }
-                                                                                },
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/stock-mvts/{{STOCK_MVT_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "stock-mvts",
-                                                                                                "{{STOCK_MVT_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Get Stock Movement By ID",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Fetches stock movement by STOCK_MVT_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/stock-mvts/{{STOCK_MVT_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "stock-mvts",
-                                                                                                "{{STOCK_MVT_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "List Stock Movements",
-                                                       "request":  {
-                                                                       "method":  "GET",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Returns paginated stock movement records.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/stock-mvts?page={{PAGE}}\u0026size={{SIZE}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "stock-mvts"
-                                                                                            ],
-                                                                                   "query":  [
-                                                                                                 {
-                                                                                                     "key":  "page",
-                                                                                                     "value":  "{{PAGE}}"
-                                                                                                 },
-                                                                                                 {
-                                                                                                     "key":  "size",
-                                                                                                     "value":  "{{SIZE}}"
-                                                                                                 }
-                                                                                             ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   },
-                                                   {
-                                                       "name":  "Delete Stock Movement",
-                                                       "request":  {
-                                                                       "method":  "DELETE",
-                                                                       "header":  [
-                                                                                      {
-                                                                                          "key":  "Accept",
-                                                                                          "value":  "application/json"
-                                                                                      }
-                                                                                  ],
-                                                                       "description":  "Soft deletes stock movement by STOCK_MVT_ID.",
-                                                                       "url":  {
-                                                                                   "raw":  "{{BASE_URL}}/api/v1/stock-mvts/{{STOCK_MVT_ID}}",
-                                                                                   "host":  [
-                                                                                                "{{BASE_URL}}"
-                                                                                            ],
-                                                                                   "path":  [
-                                                                                                "api",
-                                                                                                "v1",
-                                                                                                "stock-mvts",
-                                                                                                "{{STOCK_MVT_ID}}"
-                                                                                            ]
-                                                                               }
-                                                                   },
-                                                       "response":  [
-
-                                                                    ]
-                                                   }
-                                               ]
-                                  }
-                              ]
-                 }
-             ]
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Authenticates user credentials and stores JWT token into collection variable ACCESS_TOKEN automatically.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{PLATFORM_USERNAME}}\",\n  \"password\": \"{{PLATFORM_PASSWORD}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/login",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Register Tenant (Public)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Public onboarding endpoint to register a tenant in PENDING state with initial admin details.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"companyName\": \"Orbit Commerce Ltd\",\n  \"companyCode\": \"orbit-commerce\",\n  \"email\": \"contact@orbitcommerce.com\",\n  \"adminFullName\": \"Morgan Lee\",\n  \"adminEmail\": \"morgan.lee@orbitcommerce.com\",\n  \"adminUsername\": \"morgan.lee\",\n  \"adminPassword\": \"SecurePassword123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/register",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Tenant Management",
+          "description": "Tenant lifecycle administration APIs.",
+          "item": [
+            {
+              "name": "List Tenants",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Returns paginated tenant records. Requires authenticated bearer token.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/tenants?page={{PAGE}}\u0026size={{SIZE}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "tenants"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{PAGE}}"
+                    },
+                    {
+                      "key": "size",
+                      "value": "{{SIZE}}"
+                    }
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Approve Tenant",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Approves tenant and triggers provisioning flow.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/approve",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "tenants",
+                    "{{TENANT_RECORD_ID}}",
+                    "approve"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Activate Tenant",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Activates an existing tenant record.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/activate",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "tenants",
+                    "{{TENANT_RECORD_ID}}",
+                    "activate"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Deactivate Tenant",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Deactivates a tenant record.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/deactivate",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "tenants",
+                    "{{TENANT_RECORD_ID}}",
+                    "deactivate"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Suspend Tenant",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Suspends an active tenant when compliance or billing restrictions apply.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/tenants/{{TENANT_RECORD_ID}}/suspend",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "tenants",
+                    "{{TENANT_RECORD_ID}}",
+                    "suspend"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        },
+        {
+          "name": "User Management",
+          "description": "User lifecycle APIs inside tenant scope.",
+          "item": [
+            {
+              "name": "Create User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Creates a user in current tenant context.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"alex.mercer\",\n  \"email\": \"alex.mercer@orbitcommerce.com\",\n  \"password\": \"SecurePassword123\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Mercer\",\n  \"role\": \"ROLE_USER\",\n  \"tenantId\": \"{{TENANT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Updates user profile and role details.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"alex.mercer\",\n  \"email\": \"alex.mercer@orbitcommerce.com\",\n  \"password\": \"SecurePassword123\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Mercer\",\n  \"role\": \"ROLE_ADMINISTRATOR\",\n  \"tenantId\": \"{{TENANT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{USER_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Get User By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Fetches user details using USER_ID path variable.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{USER_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "List Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Returns paginated users for the current tenant.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users?page={{PAGE}}\u0026size={{SIZE}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{PAGE}}"
+                    },
+                    {
+                      "key": "size",
+                      "value": "{{SIZE}}"
+                    }
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Soft deletes user by USER_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{USER_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Enable User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Enables an existing user account.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}/enable",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{USER_ID}}",
+                    "enable"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Disable User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Disables an existing user account.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}/disable",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{USER_ID}}",
+                    "disable"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tenant",
+      "description": "Tenant schema domain APIs (category, product, stock movement).",
+      "item": [
+        {
+          "name": "Category Management",
+          "description": "Category CRUD endpoints under tenant context.",
+          "item": [
+            {
+              "name": "Create Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Creates a category with optional description.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Electronics\",\n  \"description\": \"Consumer electronics including mobiles and accessories\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/categories",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Update Category",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Updates category name and description by CATEGORY_ID.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Electronics \u0026 Gadgets\",\n  \"description\": \"Updated category description\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/categories/{{CATEGORY_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "{{CATEGORY_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Get Category By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Fetches single category by CATEGORY_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/categories/{{CATEGORY_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "{{CATEGORY_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "List Categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Returns paginated categories.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/categories?page={{PAGE}}\u0026size={{SIZE}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{PAGE}}"
+                    },
+                    {
+                      "key": "size",
+                      "value": "{{SIZE}}"
+                    }
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Delete Category",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Soft deletes category by CATEGORY_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/categories/{{CATEGORY_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "{{CATEGORY_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Product Management",
+          "description": "Product CRUD endpoints.",
+          "item": [
+            {
+              "name": "Create Product",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Creates a product under existing category.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Wireless Mouse\",\n  \"reference\": \"PRD-WM-1001\",\n  \"description\": \"Ergonomic wireless mouse\",\n  \"alertThreshold\": 10,\n  \"price\": 29.99,\n  \"categoryId\": \"{{CATEGORY_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/products",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Update Product",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Updates product details by PRODUCT_ID.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Wireless Mouse Pro\",\n  \"reference\": \"PRD-WM-1001\",\n  \"description\": \"Upgraded ergonomic wireless mouse\",\n  \"alertThreshold\": 8,\n  \"price\": 34.99,\n  \"categoryId\": \"{{CATEGORY_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/products/{{PRODUCT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "{{PRODUCT_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Get Product By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Fetches single product by PRODUCT_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/products/{{PRODUCT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "{{PRODUCT_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "List Products",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Returns paginated products.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/products?page={{PAGE}}\u0026size={{SIZE}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{PAGE}}"
+                    },
+                    {
+                      "key": "size",
+                      "value": "{{SIZE}}"
+                    }
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Delete Product",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Soft deletes product by PRODUCT_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/products/{{PRODUCT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "{{PRODUCT_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Stock Movement Management",
+          "description": "Stock movement CRUD endpoints for inventory updates.",
+          "item": [
+            {
+              "name": "Create Stock Movement",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Creates stock movement for a product. Valid enum values: IN, OUT.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"typeMvt\": \"IN\",\n  \"quantity\": 25,\n  \"dateMvt\": \"2026-05-16\",\n  \"comment\": \"Initial stock load\",\n  \"productId\": \"{{PRODUCT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/stock-mvts",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stock-mvts"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Update Stock Movement",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Updates stock movement by STOCK_MVT_ID.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"typeMvt\": \"OUT\",\n  \"quantity\": 5,\n  \"dateMvt\": \"2026-05-16\",\n  \"comment\": \"Order dispatch\",\n  \"productId\": \"{{PRODUCT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/stock-mvts/{{STOCK_MVT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stock-mvts",
+                    "{{STOCK_MVT_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Get Stock Movement By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Fetches stock movement by STOCK_MVT_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/stock-mvts/{{STOCK_MVT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stock-mvts",
+                    "{{STOCK_MVT_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "List Stock Movements",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Returns paginated stock movement records.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/stock-mvts?page={{PAGE}}\u0026size={{SIZE}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stock-mvts"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{PAGE}}"
+                    },
+                    {
+                      "key": "size",
+                      "value": "{{SIZE}}"
+                    }
+                  ]
+                }
+              },
+              "response": [
+              ]
+            },
+            {
+              "name": "Delete Stock Movement",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "description": "Soft deletes stock movement by STOCK_MVT_ID.",
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/stock-mvts/{{STOCK_MVT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stock-mvts",
+                    "{{STOCK_MVT_ID}}"
+                  ]
+                }
+              },
+              "response": [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
