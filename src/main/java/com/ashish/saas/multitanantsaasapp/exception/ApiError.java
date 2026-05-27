@@ -13,7 +13,7 @@ public class ApiError {
     private final Map<String, Object> details;
 
     public ApiError(Instant timestamp, int status, String error, String message, String path, String traceId,
-                   Map<String, Object> details) {
+                    Map<String, Object> details) {
         this.timestamp = timestamp;
         this.status = status;
         this.error = error;
