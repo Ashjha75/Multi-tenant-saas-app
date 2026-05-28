@@ -8,8 +8,8 @@ import org.aspectj.lang.annotation.Before;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 /**
  * AOP advice that activates the Hibernate {@code tenantFilter} before every service method call.
@@ -20,7 +20,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  */
 @Aspect
 @Component
-@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "filter", matchIfMissing = true) // toggle: enable only for filter mode
+@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "filter", matchIfMissing = true)
+// toggle: enable only for filter mode
 public class TenantHibernateFilter {
 
     private static final Logger log = LoggerFactory.getLogger(TenantHibernateFilter.class);
@@ -36,8 +37,8 @@ public class TenantHibernateFilter {
         if (tenantId == null || tenantId.isBlank()) {
             throw new IllegalStateException(
                     "[TENANT VIOLATION] No tenant found in context before calling " +
-                    joinPoint.getSignature().toShortString() +
-                    ". All service queries require X-Tenant-ID header.");
+                            joinPoint.getSignature().toShortString() +
+                            ". All service queries require X-Tenant-ID header.");
         }
 
         log.debug("[TENANT] Activating Hibernate tenantFilter for tenant='{}', method='{}'",

@@ -20,11 +20,14 @@ import java.io.IOException;
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "filter", matchIfMissing = true) // enforce header only in filter mode
+@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "filter", matchIfMissing = true)
+// enforce header only in filter mode
 public class TenantFilter implements Filter {
 
     private static final String TENANT_HEADER = "X-Tenant-ID";
-    /** Allowed tenant ID format: lowercase alphanumeric, hyphens, underscores, 2–50 chars */
+    /**
+     * Allowed tenant ID format: lowercase alphanumeric, hyphens, underscores, 2–50 chars
+     */
     private static final String TENANT_ID_PATTERN = "^[a-z0-9_-]{2,50}$";
 
     @Override
@@ -39,9 +42,9 @@ public class TenantFilter implements Filter {
 
         String path = req.getRequestURI();
         if (path.startsWith("/swagger-ui") ||
-            path.startsWith("/v3/api-docs") ||
-            path.startsWith("/api-docs") ||
-            path.endsWith("/health")) {
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/api-docs") ||
+                path.endsWith("/health")) {
             chain.doFilter(request, response);
             return;
         }
