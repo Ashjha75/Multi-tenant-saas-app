@@ -33,7 +33,7 @@ public class JpaAuditingConfig {
             if (authentication == null
                     || !authentication.isAuthenticated()
                     || "anonymousUser".equals(
-                            authentication.getPrincipal())) {
+                    authentication.getPrincipal())) {
 
                 return Optional.empty();
             }
