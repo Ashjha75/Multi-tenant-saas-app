@@ -16,21 +16,21 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="products")
-public class Product extends AbstractEntity{
+@Table(name = "products")
+public class Product extends AbstractEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "reference", nullable = false,unique = true)
+    @Column(name = "reference", nullable = false, unique = true)
     private String reference;
 
-    @Column(name = "description", nullable = false,columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
     @Column(name = "alert_threshold", nullable = false)
     private Integer alertThreshold;
 
-    @Column (name = "price", nullable = false)
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
 
     @ManyToOne
