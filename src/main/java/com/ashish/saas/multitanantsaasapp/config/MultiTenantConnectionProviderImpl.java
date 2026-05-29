@@ -65,7 +65,7 @@ public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionP
             }
         } catch (Exception e) {
             log.error("Error setting search_path to public", e);
-            throw new AppException(HttpStatus.BAD_REQUEST,"Error setting search_path to public");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Error setting search_path to public");
         } finally {
             connection.close();
         }
@@ -89,7 +89,7 @@ public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionP
 
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
-        hibernateProperties. put(MultiTenancySettings. MULTI_TENANT_CONNECTION_PROVIDER, this) ;
+        hibernateProperties.put(MultiTenancySettings.MULTI_TENANT_CONNECTION_PROVIDER, this);
     }
 
     private void validateSchemaName(String schemaName) {

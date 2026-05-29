@@ -16,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("api/v1/categories")
 @Slf4j
@@ -75,6 +73,7 @@ public class CategoryController {
             @PathVariable("category-id") final String id) {
         return ResponseEntity.ok(this.categoryService.findByID(id));
     }
+
     @GetMapping
     @Operation(
             summary = "Get all category ",
