@@ -1,5 +1,6 @@
 package com.ashish.saas.multitanantsaasapp.exception;
 
+import com.ashish.saas.multitanantsaasapp.security.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
-import com.ashish.saas.multitanantsaasapp.security.UnauthorizedException;
 
 import java.time.Instant;
 import java.util.HashMap;

@@ -15,8 +15,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="stock_mvts")
-public class StockMvt extends AbstractEntity{
+@Table(name = "stock_mvts")
+public class StockMvt extends AbstractEntity {
     @Column(name = "type_mvt", nullable = false)
     @Enumerated(EnumType.STRING)
     private TypeMvt typeMvt;
@@ -31,6 +31,7 @@ public class StockMvt extends AbstractEntity{
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
-    @ManyToOne @JoinColumn(name = "product_id")
+    @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 }
