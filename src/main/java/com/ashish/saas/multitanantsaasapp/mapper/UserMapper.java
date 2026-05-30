@@ -1,16 +1,13 @@
 package com.ashish.saas.multitanantsaasapp.mapper;
 
-import com.ashish.saas.multitanantsaasapp.config.TenantContext;
 import com.ashish.saas.multitanantsaasapp.dto.request.UserRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.UserResponse;
-import com.ashish.saas.multitanantsaasapp.entities.Tenant;
 import com.ashish.saas.multitanantsaasapp.entities.User;
-import com.ashish.saas.multitanantsaasapp.entities.UserRole;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserMapper {
-//, final Tenant tenant
+    //, final Tenant tenant
     public User toEntity(final UserRequest request) {
         return User.builder()
                 .username(request.getUsername())

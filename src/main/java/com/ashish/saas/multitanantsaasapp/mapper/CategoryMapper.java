@@ -6,12 +6,12 @@ import com.ashish.saas.multitanantsaasapp.dto.response.CategoryResponse;
 import com.ashish.saas.multitanantsaasapp.entities.Category;
 import org.springframework.stereotype.Service;
 
-import static com.ashish.saas.multitanantsaasapp.dto.response.CategoryResponse.*;
+import static com.ashish.saas.multitanantsaasapp.dto.response.CategoryResponse.builder;
 
 @Service
 public class CategoryMapper {
 
-    public Category toEntity(final CategoryRequest request){
+    public Category toEntity(final CategoryRequest request) {
         return Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -20,7 +20,7 @@ public class CategoryMapper {
                 .build();
     }
 
-    public CategoryResponse toResponse(final Category entity){
+    public CategoryResponse toResponse(final Category entity) {
         return builder().
                 id(entity.getId()).
                 name(entity.getName()).
