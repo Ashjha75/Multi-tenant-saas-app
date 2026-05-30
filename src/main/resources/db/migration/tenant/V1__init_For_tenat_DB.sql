@@ -10,13 +10,13 @@
 CREATE TABLE IF NOT EXISTS categories
 (
     -- AbstractEntity base columns
-    id          VARCHAR(255)                NOT NULL,
-    tenant_id   VARCHAR(255)                NOT NULL,
+    id          VARCHAR(255) NOT NULL,
+    tenant_id   VARCHAR(255) NOT NULL,
     created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at  TIMESTAMP WITHOUT TIME ZONE,
-    created_by  VARCHAR(255)                NOT NULL,
+    created_by  VARCHAR(255) NOT NULL,
     updated_by  VARCHAR(255),
-    deleted     BOOLEAN                     NOT NULL DEFAULT FALSE,
+    deleted     BOOLEAN      NOT NULL DEFAULT FALSE,
 
     -- Category-specific columns
     name        VARCHAR(255) NOT NULL,
@@ -33,13 +33,13 @@ CREATE TABLE IF NOT EXISTS categories
 CREATE TABLE IF NOT EXISTS products
 (
     -- AbstractEntity base columns
-    id          VARCHAR(255)                NOT NULL,
-    tenant_id   VARCHAR(255)                NOT NULL,
-    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at  TIMESTAMP WITHOUT TIME ZONE,
-    created_by  VARCHAR(255)                NOT NULL,
-    updated_by  VARCHAR(255),
-    deleted     BOOLEAN                     NOT NULL DEFAULT FALSE,
+    id              VARCHAR(255)   NOT NULL,
+    tenant_id       VARCHAR(255)   NOT NULL,
+    created_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at      TIMESTAMP WITHOUT TIME ZONE,
+    created_by      VARCHAR(255)   NOT NULL,
+    updated_by      VARCHAR(255),
+    deleted         BOOLEAN        NOT NULL DEFAULT FALSE,
 
     -- Product-specific columns
     name            VARCHAR(255)   NOT NULL,
@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS products
     CONSTRAINT pk_products PRIMARY KEY (id)
 );
 
-ALTER TABLE products ADD CONSTRAINT uc_products_reference UNIQUE (reference);
+ALTER TABLE products
+    ADD CONSTRAINT uc_products_reference UNIQUE (reference);
 
 ALTER TABLE products
     ADD CONSTRAINT fk_products_on_category
@@ -67,13 +68,13 @@ ALTER TABLE products
 CREATE TABLE IF NOT EXISTS stock_mvts
 (
     -- AbstractEntity base columns
-    id          VARCHAR(255)                NOT NULL,
-    tenant_id   VARCHAR(255)                NOT NULL,
-    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at  TIMESTAMP WITHOUT TIME ZONE,
-    created_by  VARCHAR(255)                NOT NULL,
-    updated_by  VARCHAR(255),
-    deleted     BOOLEAN                     NOT NULL DEFAULT FALSE,
+    id         VARCHAR(255) NOT NULL,
+    tenant_id  VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    created_by VARCHAR(255) NOT NULL,
+    updated_by VARCHAR(255),
+    deleted    BOOLEAN      NOT NULL DEFAULT FALSE,
 
     -- StockMvt-specific columns
     type_mvt   VARCHAR(255) NOT NULL,
