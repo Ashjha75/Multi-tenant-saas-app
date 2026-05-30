@@ -94,7 +94,7 @@ public class TenantServiceImpl implements TenantService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Tenant does not exist"));
         if (tenant.getStatus() != TenantStatus.PENDING) {
-            throw new AppException(HttpStatus.BAD_REQUEST,"Tenant is not in pending status");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Tenant is not in pending status");
         }
         tenant.setStatus(TenantStatus.ACTIVE);
 
@@ -107,7 +107,7 @@ public class TenantServiceImpl implements TenantService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Tenant does not exist"));
         if (tenant.getStatus() != TenantStatus.ACTIVE) {
-            throw new AppException(HttpStatus.BAD_REQUEST,"Tenant is not  in active status");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Tenant is not  in active status");
         }
         tenant.setStatus(TenantStatus.INACTIVE);
         tenantRepo.save(tenant);
@@ -120,7 +120,7 @@ public class TenantServiceImpl implements TenantService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Tenant does not exist"));
         if (tenant.getStatus() == TenantStatus.ACTIVE) {
-            throw new AppException(HttpStatus.BAD_REQUEST,"Tenant is in active status");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Tenant is in active status");
         }
         tenant.setStatus(TenantStatus.SUSPENDED);
         tenantRepo.save(tenant);

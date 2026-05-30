@@ -70,7 +70,7 @@ public class StockMvtServiceImpl implements StockMvtService {
 
     @Override
     public PageResponse<StockMvtResponse> findAll(int page, int size) {
-       final PageRequest pageRequest = PageRequest.of(page, size);
+        final PageRequest pageRequest = PageRequest.of(page, size);
         return PageResponse.of(
                 stockMvtRepository.findAll(pageRequest)
                         .map(stockMvtMapper::toResponse)
