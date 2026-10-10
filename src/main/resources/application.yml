@@ -43,15 +43,26 @@ spring:
     validate-on-migrate: true
 
 server:
-  port: ${PORT:8080}
+  port: ${SERVER_PORT:8080}
 
 app:
   tenant:
-    mode: ${TENANT_MODE:schema}
+    # filter -> all tenants share one schema, separated by the tenant_id column via the
+    #           Hibernate "tenantFilter" (AbstractEntity). This is the implemented mode.
+    # schema -> schema-per-tenant. NOT implemented: there is no schema provisioning and
+    #           no per-tenant migration runner, and selecting it disables TenantFilter and
+    #           TenantHibernateFilter, leaving no isolation at all. See docs/tenant-toggle.md.
+    mode: ${TENANT_MODE:filter}
 
   jwt:
-    private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:certs/private_key.pem}
-    public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:certs/public_key.pem}
+    # Resolved by Spring's ResourceLoader, so the prefix matters:
+    #   file:   -> filesystem path (relative to the working directory)
+    #   classpath: -> inside the jar
+    # "./certs" is the project root on a host run and /app/certs in the container,
+    # so the same value works everywhere. Keys are never committed or baked into the image:
+    # docker compose generates them, or they are injected as JWT_PRIVATE_KEY/JWT_PUBLIC_KEY secrets.
+    private-key-path: ${JWT_PRIVATE_KEY_PATH:file:./certs/private_key.pem}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH:file:./certs/public_key.pem}
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:86400000}
 
 springdoc:

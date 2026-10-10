@@ -16,6 +16,13 @@ public interface UserRepo extends JpaRepository<User,String> {
 
     Optional<User> findByUsername(String username);
 
+    /**
+     * Used by authentication, which runs with the Hibernate "tenantFilter" disabled (see
+     * TenantHibernateFilter). That filter normally contributes the "deleted = false" predicate,
+     * so it has to be spelled out here or a soft-deleted user could still log in.
+     */
+    Optional<User> findByUsernameAndDeletedFalse(String username);
+
     @EntityGraph(attributePaths = "tenant")
     @Query("SELECT U FROM User U WHERE U.id = :id AND U.deleted =false")
     Optional<User> findByIdAndNotDeleted(String id);

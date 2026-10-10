@@ -1,5 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.services.impl;
 
+import jakarta.transaction.Transactional;
+
 import com.ashish.saas.multitanantsaasapp.common.PageResponse;
 import com.ashish.saas.multitanantsaasapp.dto.request.ProductRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.ProductResponse;
@@ -21,6 +23,10 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+// Required: TenantHibernateFilter enables the Hibernate tenantFilter on the current
+// session, which only takes effect inside an active transaction. Without this the
+// tenant_id predicate is silently dropped from every query in this class.
+@Transactional
 public class ProductServiceImpl implements ProductService {
     private final ProductRepo productRepository;
     private final CategoryRepo categoryRepository;

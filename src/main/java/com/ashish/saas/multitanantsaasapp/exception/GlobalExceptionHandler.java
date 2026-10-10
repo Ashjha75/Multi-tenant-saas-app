@@ -4,6 +4,8 @@ import com.ashish.saas.multitanantsaasapp.security.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -13,6 +15,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -26,6 +32,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -36,6 +43,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -135,8 +144,41 @@ public class GlobalExceptionHandler {
         return buildResponse(ex.getStatusCode(), detail, request, null);
     }
 
+    /**
+     * Spring Security authentication failures. Without this handler they fall through to
+     * {@link #handleGenericException} and surface as a misleading 500.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthentication(AuthenticationException ex,
+                                                         HttpServletRequest request) {
+        String message;
+        if (ex instanceof BadCredentialsException) {
+            message = "Invalid username or password";
+        } else if (ex instanceof DisabledException) {
+            message = "Account is disabled";
+        } else if (ex instanceof LockedException) {
+            message = "Account is locked";
+        } else {
+            message = "Authentication failed";
+        }
+        log.warn("Authentication failed for {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, message, request, null);
+    }
+
+    /**
+     * An unmapped URL. Without this it reaches the catch-all below and a simple typo in a path
+     * is reported as "500 Unexpected error", which reads like a server fault.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResourceFound(NoResourceFoundException ex,
+                                                          HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "No endpoint " + request.getMethod() + " "
+                + request.getRequestURI(), request, null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception on {} {}", request.getMethod(), request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", request, null);
     }
 

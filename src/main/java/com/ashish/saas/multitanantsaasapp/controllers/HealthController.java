@@ -23,7 +23,9 @@ import java.util.Optional;
  * Useful for load-balancer probes, container orchestrators, and monitoring dashboards.
  */
 @RestController
-@RequestMapping("api/v1/health")
+// "/health" is the path humans, load balancers and container probes reach for;
+// "/api/v1/health" keeps the versioned API surface consistent. Both serve the same payload.
+@RequestMapping({"api/v1/health", "health"})
 @Tag(name = "Health", description = "Application health and readiness checks")
 public class HealthController {
 

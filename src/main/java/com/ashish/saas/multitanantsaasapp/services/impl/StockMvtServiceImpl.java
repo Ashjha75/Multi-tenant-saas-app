@@ -1,5 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.services.impl;
 
+import jakarta.transaction.Transactional;
+
 import com.ashish.saas.multitanantsaasapp.common.PageResponse;
 import com.ashish.saas.multitanantsaasapp.dto.request.StockMvtRequest;
 import com.ashish.saas.multitanantsaasapp.dto.response.StockMvtResponse;
@@ -20,6 +22,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+// Required: TenantHibernateFilter enables the Hibernate tenantFilter on the current
+// session, which only takes effect inside an active transaction. Without this the
+// tenant_id predicate is silently dropped from every query in this class.
+@Transactional
 public class StockMvtServiceImpl implements StockMvtService {
     private final StockMvtRepo stockMvtRepository;
     private final ProductRepo productRepository;

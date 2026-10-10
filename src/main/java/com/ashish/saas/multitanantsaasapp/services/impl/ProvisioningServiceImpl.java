@@ -9,6 +9,8 @@ import org.flywaydb.core.Flyway;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 
@@ -20,7 +22,19 @@ public class ProvisioningServiceImpl implements ProvisioningService {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
 
+    /**
+     * Runs outside any caller transaction.
+     *
+     * <p>This method issues DDL ({@code CREATE SCHEMA}) on the shared {@link JdbcTemplate}
+     * connection and then hands a <em>second</em> connection to Flyway. If the caller's
+     * transaction is still open, the first connection holds the uncommitted CREATE SCHEMA and
+     * Flyway's connection blocks on it forever — a self-deadlock that hangs the request until the
+     * client times out. {@code NOT_SUPPORTED} suspends the caller's transaction so each statement
+     * auto-commits, which is how this worked before {@code TenantServiceImpl} became
+     * {@code @Transactional}.
+     */
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void provisionTenant(final Tenant tenant) {
         final String schemaName = buildSchemaName(
                 tenant.getCompanyCode());

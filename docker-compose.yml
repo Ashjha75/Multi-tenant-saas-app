@@ -1,6 +1,40 @@
-version: '3.8'
+#  docker compose up --build   → database + JWT keys + app, from a clean clone.
+#  Everything the app needs is created here; nothing depends on files that only
+#  exist on one laptop.
+
+name: saas-app
 
 services:
+
+  # ── JWT key pair ──────────────────────────────────────────────
+  # One-shot: generates ./certs/*.pem on the host the first time, then exits.
+  # Keys live on the host (git-ignored), so they survive rebuilds and every
+  # container sees the same pair — tokens stay valid across restarts.
+  # Reuses the app image, so there is no extra image to pull.
+  keygen:
+    image: saas-app:local
+    build: .
+    container_name: saas-keygen
+
+    user: root
+    entrypoint:
+      - sh
+      - -c
+      - |
+        if [ -f /certs/private_key.pem ] && [ -f /certs/public_key.pem ]; then
+          echo "keygen: JWT keys already present, nothing to do"
+        else
+          echo "keygen: generating RSA key pair in ./certs"
+          openssl genrsa -out /certs/private_key.pem 2048
+          openssl rsa -in /certs/private_key.pem -pubout -out /certs/public_key.pem
+          # readable by the non-root app user inside the container
+          chmod 644 /certs/private_key.pem /certs/public_key.pem
+        fi
+
+    volumes:
+      - ./certs:/certs
+
+    restart: "no"
 
   # ── PostgreSQL Database ───────────────────────────────────────
   postgres:
@@ -15,7 +49,7 @@ services:
       PGTZ: ${DB_TZ:-Asia/Kolkata}
 
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -30,6 +64,7 @@ services:
 
   # ── Spring Boot App ───────────────────────────────────────────
   app:
+    image: saas-app:local
     build: .
     container_name: saas-app
 
@@ -39,21 +74,39 @@ services:
     env_file:
       - .env
 
-    # Override DB_HOST so the app reaches the postgres *container*,
-    # not localhost (which would be the app container's own loopback).
     environment:
-      DB_HOST: postgres   # always the docker-compose service name
+      # The app always listens on 8080 inside the container; SERVER_PORT from
+      # .env only chooses the HOST port in the mapping below.
+      SERVER_PORT: "8080"
+      # Reach the postgres *container*, not the app container's own loopback.
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      # Keys are mounted below; absolute path so it cannot depend on the workdir.
+      JWT_PRIVATE_KEY_PATH: file:/app/certs/private_key.pem
+      JWT_PUBLIC_KEY_PATH: file:/app/certs/public_key.pem
+      # This container does not manage its own docker-compose stack.
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      TZ: ${DB_TZ:-Asia/Kolkata}
 
     volumes:
-      # Mount JWT PEM keys — generated once on the VPS, never in the image
+      # Mount the JWT PEM keys created by the keygen service — never in the image
       - ./certs:/app/certs:ro
 
     depends_on:
       postgres:
         condition: service_healthy
+      keygen:
+        condition: service_completed_successfully
 
     ports:
       - "${SERVER_PORT:-8080}:8080"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/api/v1/health >/dev/null 2>&1 || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
 
     restart: unless-stopped
 

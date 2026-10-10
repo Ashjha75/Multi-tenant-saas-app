@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+// Schema routing only -- see CurrentTenantIdentifierResolverImpl and docs/tenant-toggle.md.
+@ConditionalOnProperty(prefix = "app.tenant", name = "mode", havingValue = "schema")
 public class MultiTenantConnectionProviderImpl implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
     private static final String PUBLIC_SCHEMA = "public";
     private static final Pattern VALID_SCHEMA_NAME = Pattern.compile("^[a-z0-9_]+$");

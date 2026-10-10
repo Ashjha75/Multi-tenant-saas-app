@@ -27,10 +27,15 @@ public class SecurityConfig {
     // Public endpoints that don't require authentication
     private static final String[] PUBLIC_URLS = {
             "/api/v1/health",
+            "/health",
+            // Spring forwards to /error internally; if it is not permitted the real status is
+            // replaced by a 401 and the actual error is hidden.
+            "/error",
             "/api/v1/auth/**",
-            "/v2/api-docs",
-            "/v3/api-docs",
-            "/v3/api-docs/**",
+            // springdoc.api-docs.path is /api-docs. "/api-docs/**" does not match the bare
+            // "/api-docs" or the ".yaml" variant, so both are listed explicitly.
+            "/api-docs",
+            "/api-docs.yaml",
             "/api-docs/**",
             "/swagger-resources",
             "/swagger-resources/**",

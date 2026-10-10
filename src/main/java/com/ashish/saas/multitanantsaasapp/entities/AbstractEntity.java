@@ -31,7 +31,9 @@ import java.time.LocalDateTime;
         parameters = @ParamDef(name = "tenantId", type = String.class),
         defaultCondition = "tenant_id = :tenantId AND deleted = false"
 )
-@Filter(name = "tenantFilter")
+// NOTE: no @Filter here. A @Filter on a @MappedSuperclass is silently ignored by Hibernate;
+// it must be declared on each concrete @Entity (see Category, Product, StockMvt, User).
+// The @FilterDef above is global, so declaring it once here is correct.
 public class AbstractEntity {
 
     @Id

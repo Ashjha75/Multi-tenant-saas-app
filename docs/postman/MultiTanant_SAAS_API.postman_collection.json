@@ -35,7 +35,7 @@
     },
     {
       "key": "TENANT_ID",
-      "value": "public",
+      "value": "556e48ea-8f76-4d56-8517-4c3c0a8f6db4",
       "type": "string"
     },
     {
@@ -121,8 +121,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         },
@@ -143,7 +142,7 @@
                       "});",
                       "",
                       "const json = pm.response.json();",
-                      "if (json \u0026\u0026 json.accessToken) {",
+                      "if (json && json.accessToken) {",
                       "  pm.collectionVariables.set(\"ACCESS_TOKEN\", json.accessToken);",
                       "  console.log(\"ACCESS_TOKEN updated from login response.\");",
                       "} else {",
@@ -188,8 +187,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Register Tenant (Public)",
@@ -228,8 +226,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         },
@@ -249,7 +246,7 @@
                 ],
                 "description": "Returns paginated tenant records. Requires authenticated bearer token.",
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/tenants?page={{PAGE}}\u0026size={{SIZE}}",
+                  "raw": "{{BASE_URL}}/api/v1/tenants?page={{PAGE}}&size={{SIZE}}",
                   "host": [
                     "{{BASE_URL}}"
                   ],
@@ -270,8 +267,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Approve Tenant",
@@ -298,8 +294,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Activate Tenant",
@@ -326,8 +321,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Deactivate Tenant",
@@ -354,8 +348,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Suspend Tenant",
@@ -382,8 +375,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         },
@@ -427,8 +419,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Update User",
@@ -467,8 +458,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Get User By ID",
@@ -494,8 +484,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "List Users",
@@ -509,7 +498,7 @@
                 ],
                 "description": "Returns paginated users for the current tenant.",
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/users?page={{PAGE}}\u0026size={{SIZE}}",
+                  "raw": "{{BASE_URL}}/api/v1/users?page={{PAGE}}&size={{SIZE}}",
                   "host": [
                     "{{BASE_URL}}"
                   ],
@@ -530,8 +519,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Delete User",
@@ -557,8 +545,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Enable User",
@@ -585,8 +572,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Disable User",
@@ -613,8 +599,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         }
@@ -664,8 +649,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Update Category",
@@ -684,7 +668,7 @@
                 "description": "Updates category name and description by CATEGORY_ID.",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Electronics \u0026 Gadgets\",\n  \"description\": \"Updated category description\"\n}",
+                  "raw": "{\n  \"name\": \"Electronics & Gadgets\",\n  \"description\": \"Updated category description\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -704,8 +688,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Get Category By ID",
@@ -731,8 +714,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "List Categories",
@@ -746,7 +728,7 @@
                 ],
                 "description": "Returns paginated categories.",
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/categories?page={{PAGE}}\u0026size={{SIZE}}",
+                  "raw": "{{BASE_URL}}/api/v1/categories?page={{PAGE}}&size={{SIZE}}",
                   "host": [
                     "{{BASE_URL}}"
                   ],
@@ -767,8 +749,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Delete Category",
@@ -794,8 +775,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         },
@@ -839,8 +819,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Update Product",
@@ -879,8 +858,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Get Product By ID",
@@ -906,8 +884,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "List Products",
@@ -921,7 +898,7 @@
                 ],
                 "description": "Returns paginated products.",
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/products?page={{PAGE}}\u0026size={{SIZE}}",
+                  "raw": "{{BASE_URL}}/api/v1/products?page={{PAGE}}&size={{SIZE}}",
                   "host": [
                     "{{BASE_URL}}"
                   ],
@@ -942,8 +919,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Delete Product",
@@ -969,8 +945,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         },
@@ -1014,8 +989,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Update Stock Movement",
@@ -1054,8 +1028,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Get Stock Movement By ID",
@@ -1081,8 +1054,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "List Stock Movements",
@@ -1096,7 +1068,7 @@
                 ],
                 "description": "Returns paginated stock movement records.",
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/stock-mvts?page={{PAGE}}\u0026size={{SIZE}}",
+                  "raw": "{{BASE_URL}}/api/v1/stock-mvts?page={{PAGE}}&size={{SIZE}}",
                   "host": [
                     "{{BASE_URL}}"
                   ],
@@ -1117,8 +1089,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             },
             {
               "name": "Delete Stock Movement",
@@ -1144,8 +1115,7 @@
                   ]
                 }
               },
-              "response": [
-              ]
+              "response": []
             }
           ]
         }

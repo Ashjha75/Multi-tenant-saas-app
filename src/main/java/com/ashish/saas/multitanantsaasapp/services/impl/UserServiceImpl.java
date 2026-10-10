@@ -1,5 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.services.impl;
 
+import jakarta.transaction.Transactional;
+
 import com.ashish.saas.multitanantsaasapp.common.PageResponse;
 import com.ashish.saas.multitanantsaasapp.config.TenantContext;
 import com.ashish.saas.multitanantsaasapp.dto.request.UserRequest;
@@ -26,6 +28,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+// Required: TenantHibernateFilter enables the Hibernate tenantFilter on the current
+// session, which only takes effect inside an active transaction. Without this the
+// tenant_id predicate is silently dropped from every query in this class.
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
@@ -163,7 +169,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-        return this.userRepo.findByUsername(username)
+        return this.userRepo.findByUsernameAndDeletedFalse(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No user was found with: " + username));
     }
 

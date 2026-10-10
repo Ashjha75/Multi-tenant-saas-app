@@ -13,3 +13,8 @@ target/
 *.md
 docs/
 *.log
+
+# JWT keys are mounted at runtime or injected as secrets — never in the image
+certs/
+src/main/resources/certs/
+*.pem

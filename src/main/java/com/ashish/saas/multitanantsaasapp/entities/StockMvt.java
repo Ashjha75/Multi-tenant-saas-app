@@ -1,6 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Filter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @Table(name = "stock_mvts")
+// @Filter must sit on the concrete @Entity: Hibernate does not inherit it from the
+// @MappedSuperclass (AbstractEntity), so without this the tenantFilter never applied
+// and every query returned rows from all tenants.
+@Filter(name = "tenantFilter")
 public class StockMvt extends AbstractEntity {
     @Column(name = "type_mvt", nullable = false)
     @Enumerated(EnumType.STRING)

@@ -41,10 +41,7 @@ public class TenantFilter implements Filter {
         final HttpServletResponse res = (HttpServletResponse) response;
 
         String path = req.getRequestURI();
-        if (path.startsWith("/swagger-ui") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/api-docs") ||
-                path.endsWith("/health")) {
+        if (isTenantExempt(path)) {
             chain.doFilter(request, response);
             return;
         }
@@ -82,6 +79,26 @@ public class TenantFilter implements Filter {
             TenantContext.clear();
             MDC.remove("tenantId");
         }
+    }
+
+    /**
+     * Endpoints that must work without a tenant header. These mirror the permitAll list in
+     * {@code SecurityConfig.PUBLIC_URLS}: login happens before a tenant is known, and tenant
+     * registration is what creates the tenant in the first place, so requiring X-Tenant-ID on
+     * them is a chicken-and-egg deadlock.
+     */
+    private boolean isTenantExempt(final String path) {
+        return path.startsWith("/api/v1/auth/")
+                || path.endsWith("/health")
+                || path.equals("/error")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v2/api-docs")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/api-docs")
+                || path.startsWith("/swagger-resources")
+                || path.startsWith("/configuration/")
+                || path.startsWith("/webjars/")
+                || path.equals("/swagger-ui.html");
     }
 
     private String headerResolver(HttpServletRequest req) {

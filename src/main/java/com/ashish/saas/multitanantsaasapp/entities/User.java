@@ -1,6 +1,7 @@
 package com.ashish.saas.multitanantsaasapp.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Filter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,10 @@ import java.util.List;
 @SuperBuilder
 @Entity
 @Table(name = "users")
+// @Filter must sit on the concrete @Entity: Hibernate does not inherit it from the
+// @MappedSuperclass (AbstractEntity), so without this the tenantFilter never applied
+// and every query returned rows from all tenants.
+@Filter(name = "tenantFilter")
 public class User extends AbstractEntity implements UserDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", insertable = false, updatable = false,
