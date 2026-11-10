@@ -69,3 +69,8 @@ build/
 src/main/resources/certs/*.pem
 certs/*.pem
 
+
+# Working notes and AI-tool state — keep out of the public tree
+prompt.md
+FIX.md
+.commandcode/
