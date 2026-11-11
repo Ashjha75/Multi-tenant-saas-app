@@ -42,9 +42,10 @@ services:
     container_name: saas-db
 
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # Defaults match application.yml, so the stack runs even with no .env file.
+      POSTGRES_DB: ${DB_NAME:-saas-db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       TZ: ${DB_TZ:-Asia/Kolkata}
       PGTZ: ${DB_TZ:-Asia/Kolkata}
 
@@ -55,7 +56,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-saas-db}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,16 +69,25 @@ services:
     build: .
     container_name: saas-app
 
-    # Load ALL env vars from the .env file at compose start.
-    # On your VPS, create this file manually (see .env.example).
+    # Load env vars from .env when it exists (see .env.example). It is optional:
+    # without it, the defaults below and in application.yml are used.
     # Never commit .env to git — it is in .gitignore.
     env_file:
-      - .env
+      - path: .env
+        required: false
 
     environment:
       # The app always listens on 8080 inside the container; SERVER_PORT from
       # .env only chooses the HOST port in the mapping below.
       SERVER_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      # Must match the postgres service credentials above.
+      DB_NAME: ${DB_NAME:-saas-db}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_TZ: ${DB_TZ:-Asia/Kolkata}
+      TENANT_MODE: ${TENANT_MODE:-filter}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-86400000}
       # Reach the postgres *container*, not the app container's own loopback.
       DB_HOST: postgres
       DB_PORT: "5432"
